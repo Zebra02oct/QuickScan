@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi - Sistem Absensi Digital Sekolah</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('img/logo.webp') }}" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-white font-sans text-gray-900">
+    <div class="h-screen w-screen overflow-hidden flex items-center justify-center relative">
+
+        <div class="absolute inset-0"
+            style="background: linear-gradient(135deg, rgb(240, 249, 255) 0%, rgb(224, 242, 254) 50%, rgb(186, 230, 253) 100%);">
+        </div>
+
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute rounded-full opacity-15"
+                style="width: 150px; height: 150px; background: linear-gradient(135deg, rgb(56, 189, 248), rgb(14, 165, 233)); left: 5%; top: 10%; animation: 3s ease-in-out 0s infinite normal none running float;">
+            </div>
+            <div class="absolute rounded-full opacity-15"
+                style="width: 210px; height: 210px; background: linear-gradient(135deg, rgb(56, 189, 248), rgb(14, 165, 233)); left: 25%; top: 40%; animation: 3.4s ease-in-out 0.2s infinite normal none running float;">
+            </div>
+            <div class="absolute rounded-full opacity-15"
+                style="width: 270px; height: 270px; background: linear-gradient(135deg, rgb(56, 189, 248), rgb(14, 165, 233)); left: 45%; top: 70%; animation: 3.8s ease-in-out 0.4s infinite normal none running float;">
+            </div>
+            <div class="absolute rounded-full opacity-15"
+                style="width: 330px; height: 330px; background: linear-gradient(135deg, rgb(56, 189, 248), rgb(14, 165, 233)); left: 65%; top: 10%; animation: 4.2s ease-in-out 0.6s infinite normal none running float;">
+            </div>
+            <div class="absolute rounded-full opacity-15"
+                style="width: 390px; height: 390px; background: linear-gradient(135deg, rgb(56, 189, 248), rgb(14, 165, 233)); left: 85%; top: 40%; animation: 4.6s ease-in-out 0.8s infinite normal none running float;">
+            </div>
+        </div>
+
+        <div class="absolute inset-0 opacity-8"
+            style="background-image: radial-gradient(circle, rgb(14, 165, 233) 1px, transparent 1px); background-size: 28px 28px;">
+        </div>
+
+        <div
+            class="relative z-10 bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-sky-100 p-8 md:p-12 max-w-lg w-full mx-4 text-center transition-all duration-700 opacity-100 scale-100">
+            <div
+                class="w-20 h-20 rounded-2xl bg-white flex items-center justify-center mx-auto mb-6 shadow-lg border border-sky-100 p-2">
+                <img src="{{ asset('img/logo.webp') }}" alt="Logo Sekolah"
+                    class="w-full h-full object-contain drop-shadow-sm">
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Sistem Absensi</h1>
+            <p class="text-sm font-medium text-sky-500 uppercase tracking-wider mb-4">Sistem Absensi Digital Sekolah</p>
+            <p class="text-gray-500 text-sm md:text-base mb-8 leading-relaxed">
+                Kelola kehadiran siswa dengan mudah dan cepat.
+            </p>
+
+            <div class="flex items-center justify-center gap-6 mb-8">
+                <div class="text-center">
+                    <p class="text-xl font-bold text-sky-500">847</p>
+                    <p class="text-xs text-gray-400">Siswa</p>
+                </div>
+                <div class="w-px h-8 bg-gray-200"></div>
+                <div class="text-center">
+                    <p class="text-xl font-bold text-sky-500">24</p>
+                    <p class="text-xs text-gray-400">Guru</p>
+                </div>
+                <div class="w-px h-8 bg-gray-200"></div>
+                <div class="text-center">
+                    <p class="text-xl font-bold text-sky-500">99</p>
+                    <p class="text-xs text-gray-400">Kelas</p>
+                </div>
+            </div>
+
+            <a href="{{ route('login') }}"
+                class="flex items-center justify-center w-full py-4 rounded-2xl text-white font-bold text-base transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] cursor-pointer whitespace-nowrap"
+                style="background: linear-gradient(135deg, rgb(56, 189, 248) 0%, rgb(14, 165, 233) 50%, rgb(2, 132, 199) 100%);">
+                <i class="ri-login-box-line text-lg mr-2"></i>Login
+            </a>
+
+            <p class="text-xs text-gray-400 mt-6">&copy; 2026 Absensi &mdash; SMK Katolik Santa</p>
+        </div>
+
+    </div>
+</body>
+
+</html>
