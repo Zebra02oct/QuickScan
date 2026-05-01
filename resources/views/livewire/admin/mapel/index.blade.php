@@ -158,7 +158,7 @@
                 });
             });
 
-            // Listener untuk Notifikasi Error
+
             Livewire.on('swal:error', (data) => {
                 let info = data[0];
 

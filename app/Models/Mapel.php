@@ -10,7 +10,7 @@ class Mapel extends Model
   protected $table = 'mapels';
     use SoftDeletes;
 
-    // Daftar kolom yang boleh diisi secara massal
+ 
     protected $fillable = [
         'kode_mapel',
         'nama_mapel',

@@ -58,7 +58,7 @@ class Index extends Component
 
     public function exportExcel()
     {
-        // Kasih nama file dinamis pakai tanggal hari ini
+      
         $namaFile = 'Data_Siswa_' . date('Ymd_His') . '.xlsx';
         
         return Excel::download(new SiswaExport, $namaFile);

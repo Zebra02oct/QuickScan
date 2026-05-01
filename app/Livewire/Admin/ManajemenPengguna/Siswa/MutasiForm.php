@@ -34,7 +34,6 @@ class MutasiForm extends Component
 
     public function updatedKelasAsalId($value)
     {
-        // Reset state awal tiap ganti kelas asal
         $this->list_kelas_tujuan = [];
         $this->is_lulus = false;
         $this->kelas_tujuan_id = '';
@@ -54,15 +53,13 @@ class MutasiForm extends Component
             $kelasAsal = Kelas::find($value);
             
             if ($kelasAsal) {
-                // Konversi tingkat ke huruf besar semua buat jaga-jaga typo
+            
                 $tingkat = strtoupper($kelasAsal->tingkat); 
 
                 if ($tingkat === 'X' ) {
-                    // Kalau kelas 10, tampilkan pilihan kelas 11
                     $this->list_kelas_tujuan = Kelas::whereIn('tingkat', ['XI'])->get();
                 } 
                 elseif ($tingkat === 'XI') {
-                    // Kalau kelas 11, tampilkan pilihan kelas 12
                     $this->list_kelas_tujuan = Kelas::whereIn('tingkat', ['XII'])->get();
                 } 
                 elseif ($tingkat === 'XII' ) {

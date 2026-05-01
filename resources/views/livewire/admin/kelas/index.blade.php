@@ -146,12 +146,9 @@
                     </tbody>
                 </table>
             </div>
-
-            @if ($kelases->hasPages())
-                <div class="mt-4 sm:mt-5 border-t border-slate-100 pt-3 sm:pt-4">
-                    {{ $kelases->links() }}
-                </div>
-            @endif
+            <div class="w-full">
+                {{ $kelases->links('components.ui.custom-pagination') }}
+            </div>
 
         </div>
 
@@ -194,16 +191,16 @@
 
         document.addEventListener('livewire:initialized', () => {
 
-            // Listener untuk Notifikasi Sukses
+
             Livewire.on('swal:success', (data) => {
-                // Livewire 3 mengirim data dalam bentuk array di parameter pertama
+
                 let info = data[0];
 
                 Swal.fire({
                     title: info.title,
                     text: info.text,
                     icon: 'success',
-                    confirmButtonColor: '#22c55e', // Warna hijau Tailwind
+                    confirmButtonColor: '#22c55e',
                     confirmButtonText: 'OK',
                     customClass: {
                         popup: 'rounded-2xl'
@@ -211,7 +208,7 @@
                 });
             });
 
-            // Listener untuk Notifikasi Error
+
             Livewire.on('swal:error', (data) => {
                 let info = data[0];
 
@@ -219,7 +216,7 @@
                     title: info.title,
                     text: info.text,
                     icon: 'error',
-                    confirmButtonColor: '#ef4444', // Warna merah Tailwind
+                    confirmButtonColor: '#ef4444',
                     confirmButtonText: 'Mengerti',
                     customClass: {
                         popup: 'rounded-2xl'

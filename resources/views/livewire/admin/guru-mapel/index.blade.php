@@ -10,24 +10,22 @@
                     <i class='ri-calendar-todo-line text-2xl'></i>
                 </div>
                 <div>
-                    <h2 class="text-lg font-bold text-gray-800">Manajemen Mapel Guru</h2>
-                    <p class="text-sm text-gray-500">Atur penugasan guru, mata pelajaran, dan kelas secara terstruktur..
+                    <h2 class="text-lg font-bold text-gray-800">Manajemen Pengampu (Guru Mapel)</h2>
+                    <p class="text-sm text-gray-500">Atur penugasan guru, mata pelajaran, dan kelas secara terstruktur.
                     </p>
                 </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                <x-ui.button @click="$dispatch('open-create-jadwal')" class="w-full sm:w-auto" size="md"
+                <x-ui.button @click="$dispatch('open-create-gurumapel')" class="w-full sm:w-auto" size="md"
                     color="primary" icon="ri-add-line">
-                    Tambah
+                    Tambah Penugasan
                 </x-ui.button>
             </div>
         </div>
 
         <div class="p-4 sm:p-5">
-
             <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-gray-100 mb-6 shadow-inner">
-
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                     <div class="flex items-center gap-3 shrink-0">
                         <div
@@ -45,15 +43,12 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t border-gray-200/60">
-
-
-
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 border-t border-gray-200/60">
                     <div>
                         <select wire:model.live="filter_kelas"
                             class="w-full py-2 px-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all shadow-sm text-sm text-gray-600 bg-white">
                             <option value="">Semua Kelas</option>
-                            @foreach ($list_kelas as $kls)
+                            @foreach ($this->list_kelas as $kls)
                                 <option value="{{ $kls->id }}">{{ $kls->nama_kelas }}</option>
                             @endforeach
                         </select>
@@ -63,17 +58,17 @@
                         <select wire:model.live="filter_mapel"
                             class="w-full py-2 px-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all shadow-sm text-sm text-gray-600 bg-white">
                             <option value="">Semua Mata Pelajaran</option>
-                            @foreach ($list_mapel as $mapel)
+                            @foreach ($this->list_mapel as $mapel)
                                 <option value="{{ $mapel->id }}">{{ $mapel->kode_mapel }} -
                                     {{ ucwords($mapel->nama_mapel) }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
-
             </div>
+
             <div class="flex flex-col gap-4">
-                @forelse ($gurus as $guru)
+                @forelse ($this->gurus as $guru)
                     <div x-data="{ open: false }"
                         class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition-all duration-200"
                         :class="open ? 'ring-2 ring-orange-500/20 border-orange-200' : 'hover:border-gray-300'">
@@ -91,7 +86,7 @@
                                     <div class="flex items-center gap-2 mt-0.5">
                                         <span
                                             class="px-2 py-0.5 bg-sky-50 text-sky-600 text-[10px] sm:text-xs font-semibold rounded-md border border-sky-100">
-                                            {{ $guru->guruMapel->count() }} Jadwal Mengajar
+                                            {{ $guru->guruMapels->count() }} Kelas Diampu
                                         </span>
                                     </div>
                                 </div>
@@ -104,51 +99,53 @@
 
                         <div x-show="open" x-transition.opacity.duration.300ms style="display: none;"
                             class="border-t border-gray-100 bg-slate-50/50 p-4">
-                            <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm  bg-white">
+                            <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm bg-white">
                                 <table class="w-full text-left min-w-[550px]">
                                     <thead
                                         class="bg-gray-50 text-gray-600 font-semibold border-b border-gray-200 whitespace-nowrap text-xs">
                                         <tr>
                                             <th class="px-4 py-3 w-10 text-center">No</th>
-                                            <th class="px-4 py-3">Mata Pelajaran</th>
+                                            <th class="px-4 text-center py-3">Kode Mapel</th>
+                                            <th class="px-4 text-center py-3">Mata Pelajaran</th>
                                             <th class="px-4 py-3 text-center">Kelas</th>
                                             <th class="px-4 py-3 text-center">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
-                                        @foreach ($guru->guruMapel as $idx => $jadwal)
+                                        @foreach ($guru->guruMapels as $idx => $item)
                                             <tr class="hover:bg-orange-50/40 transition-colors"
-                                                wire:key="jadwal-{{ $jadwal->id }}">
+                                                wire:key="item-{{ $item->id }}">
                                                 <td class="px-4 py-3 text-center text-gray-500 text-xs">
                                                     {{ $idx + 1 }}</td>
-
-
-                                                <td class="px-4 py-3 whitespace-nowrap">
-                                                    <div class="text-xs sm:text-sm font-semibold text-sky-700">
-                                                        {{ ucwords($jadwal->mapel->nama_mapel ?? '-') }}
-                                                    </div>
-                                                    <div class="text-[10px] text-slate-400 font-mono">
-                                                        {{ $jadwal->mapel->kode_mapel ?? '-' }}
-                                                    </div>
-                                                </td>
 
                                                 <td class="px-4 py-3 text-center whitespace-nowrap">
                                                     <span
                                                         class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                                                        {{ $jadwal->kelas->nama_kelas ?? '-' }}
+                                                        {{ $item->mapel->kode_mapel ?? '-' }}
                                                     </span>
                                                 </td>
+                                                <td class="px-4 py-3 text-center whitespace-nowrap">
+                                                    <div class="text-xs sm:text-sm font-semibold text-sky-700">
+                                                        {{ ucwords($item->mapel->nama_mapel ?? '-') }}
+                                                    </div>
 
+                                                </td>
+                                                <td class="px-4 py-3 text-center whitespace-nowrap">
+                                                    <span
+                                                        class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                                        {{ $item->kelas->nama_kelas ?? '-' }}
+                                                    </span>
+                                                </td>
                                                 <td class="px-4 py-3 text-center whitespace-nowrap">
                                                     <div class="flex items-center justify-center gap-2">
                                                         <button
-                                                            @click="$dispatch('open-edit-jadwal', { id: {{ $jadwal->id }} });"
+                                                            @click="$dispatch('open-edit-gurumapel', { id: {{ $item->id }} });"
                                                             class="w-7 h-7 rounded bg-yellow-50 text-yellow-600 hover:bg-yellow-500 hover:text-white transition-all flex items-center justify-center border border-yellow-100 shadow-sm tooltip"
                                                             data-tip="Edit">
                                                             <i class="ri-pencil-line text-xs"></i>
                                                         </button>
                                                         <button type="button"
-                                                            onclick="konfirmasiHapusJadwal({{ $jadwal->id }})"
+                                                            onclick="konfirmasiHapusGuruMapel({{ $item->id }})"
                                                             class="w-7 h-7 rounded bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center border border-red-100 shadow-sm tooltip"
                                                             data-tip="Hapus">
                                                             <i class="ri-delete-bin-line text-xs"></i>
@@ -169,30 +166,65 @@
                                 class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 mb-4 border border-slate-100">
                                 <i class="ri-user-unfollow-line text-4xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-slate-800">Tidak Ada Data</h3>
-
+                            <h3 class="text-lg font-bold text-slate-800">Tidak Ada Data Guru Mapel</h3>
                         </div>
                     </div>
                 @endforelse
             </div>
 
-            @if ($gurus->hasPages())
+            @if ($this->gurus->hasPages())
                 <div class="mt-6 border-t border-slate-100 pt-4">
-                    {{ $gurus->links() }}
+                    {{ $this->gurus->links() }}
                 </div>
             @endif
         </div>
 
-        <livewire:admin.jadwal.form />
+        <livewire:admin.guru-mapel.form />
     </div>
 </div>
 
 @push('scripts')
     <script>
-        function konfirmasiHapusJadwal(id) {
+        document.addEventListener('livewire:initialized', () => {
+
+
+            Livewire.on('swal:success', (data) => {
+
+                let info = data[0];
+
+                Swal.fire({
+                    title: info.title,
+                    text: info.text,
+                    icon: 'success',
+                    confirmButtonColor: '#22c55e',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'rounded-2xl'
+                    }
+                });
+            });
+
+            Livewire.on('swal:error', (data) => {
+                let info = data[0];
+
+                Swal.fire({
+                    title: info.title,
+                    text: info.text,
+                    icon: 'error',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'Mengerti',
+                    customClass: {
+                        popup: 'rounded-2xl'
+                    }
+                });
+            });
+
+        });
+
+        function konfirmasiHapusGuruMapel(id) {
             Swal.fire({
-                title: 'Hapus Plotting?',
-                html: `Kamu akan menghapus plotting mapel dan kelas ini.<br><small class="text-slate-500">Data absensi terkait mungkin akan terdampak.</small>`,
+                title: 'Hapus Penugasan?',
+                html: `Kamu akan menghapus izin mengajar guru pada kelas ini.<br><small class="text-slate-500">Akses guru ke kelas tersebut akan dicabut.</small>`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Hapus!',
@@ -205,7 +237,7 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Livewire.dispatch('hapus-jadwal', {
+                    Livewire.dispatch('hapus-guru-mapel', {
                         id: id
                     });
                 }

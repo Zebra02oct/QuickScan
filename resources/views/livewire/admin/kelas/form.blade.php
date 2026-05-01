@@ -10,7 +10,17 @@
             openModal();
             $wire.loadData($event.detail.id).then(() => isLoading = false);
         ">
-
+        @if ($kelas_id && ($tingkat !== $original_tingkat || $jurusan !== $original_jurusan || $rombel !== $original_rombel))
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4 transition-all duration-300">
+                <div class="flex">
+                    <i class="ri-alert-fill text-amber-500 mr-3 text-xl"></i>
+                    <p class="text-sm text-amber-700">
+                        <strong>PERHATIAN!</strong> Mengubah Nama Kelas (Tingkat/Jurusan/grub) akan ikut merubah
+                        status seluruh Siswa dan riwayat Jadwal Pelajaran yang saat ini terhubung dengan kelas ini.
+                    </p>
+                </div>
+            </div>
+        @endif
         <form id="formSaveKelas"
             @submit.prevent="$dispatch('is-saving', true); $wire.save().finally(() => $dispatch('is-saving', false))">
 

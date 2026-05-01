@@ -46,7 +46,7 @@ class GuruExport implements FromQuery, WithMapping, WithHeadings, ShouldAutoSize
                 'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'startColor' => ['argb' => 'FF4F46E5'] // Warna background header Indigo
+                    'startColor' => ['argb' => 'FF4F46E5'] 
                 ]
             ],
         ];

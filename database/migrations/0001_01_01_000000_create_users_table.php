@@ -12,13 +12,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             
-            // Penambahan field sesuai kebutuhan
+         
             $table->enum('role', ['siswa', 'admin', 'guru', 'superadmin'])->default('siswa');
             $table->enum('status', ['aktif', 'nonaktif','lulus','pindah'])->default('aktif');
             $table->enum('jenis_kelamin', ['L', 'P'])->nullable();
             $table->string('user_photo')->nullable();
             
-            // Bawaan Breeze
+         
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

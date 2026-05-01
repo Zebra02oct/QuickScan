@@ -22,9 +22,8 @@ class Login extends Component
     #[Validate('required|string')]
     public string $password = '';
 
-    // Properti $remember dihapus
-
-    public function login()
+   
+ public function login()
     {
         $this->validate();
 

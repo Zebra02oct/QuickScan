@@ -83,14 +83,6 @@ class Index extends Component
             }
 
          
-            $guruMapel = \App\Models\GuruMapel::where('kelas_id', $kelas->id)->exists();
-            if ($guruMapel) {
-                $this->dispatch('swal:error', [
-                    'title' => 'Ditolak!',
-                    'text'  => "Tidak dapat menghapus kelas ini karena masih terikat dengan Mata Pelajaran Guru. Hapus Mata Pelajaran terkait terlebih dahulu."
-                ]);
-                return;
-            }
 
             $namaKelas = $kelas->nama_kelas;
             $kelas->forceDelete(); 

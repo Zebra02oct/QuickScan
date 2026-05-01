@@ -13,7 +13,11 @@ class Form extends Component
     public $jurusan = '';
     public $rombel = ''; 
     public $nama_kelas = '';
-    public $guru_id = ''; // Bisa kosong
+    public $guru_id = ''; 
+
+    public $original_tingkat;
+    public $original_jurusan;
+    public $original_rombel;
 
     protected function rules()
     {
@@ -21,7 +25,7 @@ class Form extends Component
             'tingkat' => 'required|string',
             'jurusan' => 'required|string',
             'rombel' => 'nullable|string',
-            'guru_id' => 'nullable|exists:gurus,id', // Tambahin validasi ini bray
+            'guru_id' => 'nullable|exists:gurus,id', 
             'nama_kelas' => [
                 'required',
                 'string',
@@ -67,6 +71,10 @@ class Form extends Component
                 $this->rombel = end($nama_parts); 
                 
                 $this->nama_kelas = $data->nama_kelas;
+
+                $this->original_tingkat = $data->tingkat;
+        $this->original_jurusan = $data->jurusan;
+        $this->original_rombel = end($nama_parts);
             }
         }
     }

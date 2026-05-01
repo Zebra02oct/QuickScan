@@ -62,7 +62,6 @@ class Index extends Component
                 $mapel->delete();
                 $pesan = 'Mapel berhasil di hapus (soft delete).';
             } else {
-                // Skenario B: Hard Delete
                 $mapel->forceDelete();
                 $pesan = 'Mapel berhasil dihapus.';
             }

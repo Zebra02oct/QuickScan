@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('guru_mapels', function (Blueprint $table) {
           $table->id();
         
-        // Relasi ke tabel lain
+     
         $table->foreignId('kelas_id')->constrained('kelas')->cascadeOnDelete();
         $table->foreignId('mapel_id')->constrained('mapels')->cascadeOnDelete();
         $table->foreignId('guru_id')->constrained('gurus')->cascadeOnDelete();

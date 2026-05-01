@@ -41,102 +41,163 @@
                     </a>
                 </li>
 
-                <p class="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-6 mb-3">Manajemen
-                    Pengguna
-                </p>
+                @if (Auth::user()->role === 'admin')
+                    <p class="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-6 mb-3">Manajemen
+                        Pengguna
+                    </p>
 
-                <li x-data="{
-                    open: {{ request()->is('admin/manajemenData-*') ? 'true' : 'false' }}
-                }">
+                    <li x-data="{
+                        open: {{ request()->is('admin/manajemenData-*') ? 'true' : 'false' }}
+                    }">
 
-                    <button @click="open = !open"
-                        class="group w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 {{ request()->is('admin/manajemenData-*') ? 'bg-sky-50 text-sky-600 font-semibold' : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
-                        <div class="flex items-center gap-3">
-                            <i
-                                class="ri-group-{{ request()->is('admin/manajemenData-*') ? 'fill' : 'line' }} text-xl group-hover:animate-jiggle"></i>
-                            <span class="text-sm">User</span>
-                        </div>
-                        <i class="ri-arrow-down-s-line text-lg transition-transform duration-300"
-                            :class="open ? 'rotate-180' : ''"></i>
-                    </button>
+                        <button @click="open = !open"
+                            class="group w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 {{ request()->is('admin/manajemenData-*') ? 'bg-sky-50 text-sky-600 font-semibold' : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
+                            <div class="flex items-center gap-3">
+                                <i
+                                    class="ri-group-{{ request()->is('admin/manajemenData-*') ? 'fill' : 'line' }} text-xl group-hover:animate-jiggle"></i>
+                                <span class="text-sm">User</span>
+                            </div>
+                            <i class="ri-arrow-down-s-line text-lg transition-transform duration-300"
+                                :class="open ? 'rotate-180' : ''"></i>
+                        </button>
 
-                    <ul x-show="open" x-collapse.duration.300ms class="mt-1 space-y-1 px-3">
+                        <ul x-show="open" x-collapse.duration.300ms class="mt-1 space-y-1 px-3">
 
-                        <li>
-                            <a href="{{ route('admin.siswa.index') }}" wire:navigate
-                                class="group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300 {{ request()->routeIs('admin.siswa.index') ? 'text-sky-600 font-semibold bg-sky-50/80' : 'text-gray-500 hover:text-sky-600 hover:bg-sky-50/50 hover:translate-x-1' }}">
-                                <div
-                                    class="w-1.5 h-1.5 rounded-full transition-transform duration-300 group-hover:scale-150 {{ request()->routeIs('admin.siswa.index') ? 'bg-sky-500' : 'bg-gray-300 group-hover:bg-sky-400' }}">
-                                </div>
-                                <span class="text-sm">Data Siswa</span>
-                            </a>
-                        </li>
+                            <li>
+                                <a href="{{ route('admin.siswa.index') }}" wire:navigate
+                                    class="group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300 {{ request()->routeIs('admin.siswa.index') ? 'text-sky-600 font-semibold bg-sky-50/80' : 'text-gray-500 hover:text-sky-600 hover:bg-sky-50/50 hover:translate-x-1' }}">
+                                    <div
+                                        class="w-1.5 h-1.5 rounded-full transition-transform duration-300 group-hover:scale-150 {{ request()->routeIs('admin.siswa.index') ? 'bg-sky-500' : 'bg-gray-300 group-hover:bg-sky-400' }}">
+                                    </div>
+                                    <span class="text-sm">Data Siswa</span>
+                                </a>
+                            </li>
 
-                        <li>
-                            <a href="{{ route('admin.guru.index') }}" wire:navigate
-                                class="group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300 {{ request()->routeIs('admin.guru.index') ? 'text-sky-600 font-semibold bg-sky-50/80' : 'text-gray-500 hover:text-sky-600 hover:bg-sky-50/50 hover:translate-x-1' }}">
-                                <div
-                                    class="w-1.5 h-1.5 rounded-full transition-transform duration-300 group-hover:scale-150 {{ request()->routeIs('admin.guru.index') ? 'bg-sky-500' : 'bg-gray-300 group-hover:bg-sky-400' }}">
-                                </div>
-                                <span class="text-sm">Data Guru</span>
-                            </a>
-                        </li>
+                            <li>
+                                <a href="{{ route('admin.guru.index') }}" wire:navigate
+                                    class="group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300 {{ request()->routeIs('admin.guru.index') ? 'text-sky-600 font-semibold bg-sky-50/80' : 'text-gray-500 hover:text-sky-600 hover:bg-sky-50/50 hover:translate-x-1' }}">
+                                    <div
+                                        class="w-1.5 h-1.5 rounded-full transition-transform duration-300 group-hover:scale-150 {{ request()->routeIs('admin.guru.index') ? 'bg-sky-500' : 'bg-gray-300 group-hover:bg-sky-400' }}">
+                                    </div>
+                                    <span class="text-sm">Data Guru</span>
+                                </a>
+                            </li>
 
-                    </ul>
-                </li>
+                        </ul>
+                    </li>
 
-                <p class="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-6 mb-3">Data Master
-                </p>
+                    <p class="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-6 mb-3">Data Master
+                    </p>
 
-
-
-
-                <li>
-                    <a href="{{ route('admin.kelas.index') }}" wire:navigate
-                        class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
+                    <li>
+                        <a href="{{ route('admin.kelas.index') }}" wire:navigate
+                            class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
         {{ request()->routeIs('admin.kelas.*')
             ? 'bg-sky-50 text-sky-600 font-semibold'
             : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
 
-                        <i
-                            class="ri-building-{{ request()->routeIs('admin.kelas.*') ? 'fill' : 'line' }} 
+                            <i
+                                class="ri-building-{{ request()->routeIs('admin.kelas.*') ? 'fill' : 'line' }} 
            text-xl group-hover:animate-jiggle"></i>
 
-                        <span class="text-sm">Manajemen Kelas</span>
-                    </a>
-                </li>
+                            <span class="text-sm">Manajemen Kelas</span>
+                        </a>
+                    </li>
 
-                <li>
-                    <a href="{{ route('admin.mapel.index') }}" wire:navigate
-                        class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
+                    <li>
+                        <a href="{{ route('admin.mapel.index') }}" wire:navigate
+                            class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
         {{ request()->routeIs('admin.mapel.*')
             ? 'bg-sky-50 text-sky-600 font-semibold'
             : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
 
-                        <i
-                            class="ri-book-open-{{ request()->routeIs('admin.mapel.*') ? 'fill' : 'line' }} 
+                            <i
+                                class="ri-book-open-{{ request()->routeIs('admin.mapel.*') ? 'fill' : 'line' }} 
            text-xl group-hover:animate-jiggle"></i>
 
-                        <span class="text-sm">Manajemen Mapel</span>
-                    </a>
-                </li>
+                            <span class="text-sm">Manajemen Mapel</span>
+                        </a>
+                    </li>
 
-                <li>
-                    <a href="{{ route('admin.jadwal.index') }}" wire:navigate
-                        class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
-        {{ request()->routeIs('admin.jadwal.*')
+                    <li>
+                        <a href="{{ route('admin.guruMapel.index') }}" wire:navigate
+                            class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
+        {{ request()->routeIs('admin.guruMapel.index')
             ? 'bg-sky-50 text-sky-600 font-semibold'
             : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
 
-                        <i
-                            class="ri-calendar-todo-{{ request()->routeIs('admin.jadwal.*') ? 'fill' : 'line' }} 
+                            <i
+                                class="ri-calendar-todo-{{ request()->routeIs('admin.guruMapel.index') ? 'fill' : 'line' }} 
            text-xl group-hover:animate-jiggle"></i>
 
-                        <span class="text-sm">Manajemen Jadwal</span>
-                    </a>
-                </li>
+                            <span class="text-sm">Manajemen Guru Mapel</span>
+                        </a>
+                    </li>
             </ul>
         </div>
+        @endif
+
+        @if (Auth::user()->role === 'guru')
+            <li>
+                <a href="{{ route('guru.absen.buka') }}" wire:navigate
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
+        {{ request()->routeIs('guru.absen.buka')
+            ? 'bg-sky-50 text-sky-600 font-semibold'
+            : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
+
+                    <i
+                        class="ri-slideshow-{{ request()->routeIs('guru.absen.buka') ? 'fill' : 'line' }} 
+           text-xl group-hover:animate-jiggle"></i>
+
+                    <span class="text-sm">Buka Sesi Absensi</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('guru.manajemenAbsensi') }}" wire:navigate
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
+        {{ request()->routeIs('guru.manajemenAbsensi')
+            ? 'bg-sky-50 text-sky-600 font-semibold'
+            : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
+
+                    <i
+                        class="ri-folder-user-{{ request()->routeIs('guru.manajemenAbsensi') ? 'fill' : 'line' }} 
+           text-xl group-hover:animate-jiggle"></i>
+
+                    <span class="text-sm">Manajemen Absensi</span>
+                </a>
+            </li>
+        @endif
+
+        @if (Auth::user()->role === 'siswa')
+            <li>
+                <a href="{{ route('siswa.absen.scan') }}" wire:navigate
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
+        {{ request()->routeIs('siswa.absen.scan')
+            ? 'bg-sky-50 text-sky-600 font-semibold'
+            : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
+
+                    <i
+                        class="ri-slideshow-{{ request()->routeIs('siswa.absen.scan') ? 'fill' : 'line' }} 
+           text-xl group-hover:animate-jiggle"></i>
+
+                    <span class="text-sm">Absensi</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('siswa.riwayatKehadiran') }}" wire:navigate
+                    class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
+        {{ request()->routeIs('siswa.riwayatKehadiran')
+            ? 'bg-sky-50 text-sky-600 font-semibold'
+            : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
+
+                    <i
+                        class="ri-history-{{ request()->routeIs('siswa.riwayatKehadiran') ? 'fill' : 'line' }} 
+           text-xl group-hover:animate-jiggle"></i>
+
+                    <span class="text-sm">Riwayat Kehadiran</span>
+                </a>
+            </li>
+        @endif
 
         <div class="p-4 border-t border-sky-100">
             <form id="logout-form-sidebar" method="POST" action="{{ route('logout') }}" class="hidden">

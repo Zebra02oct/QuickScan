@@ -48,7 +48,7 @@ class Index extends Component
 
       public function exportExcel()
     {
-        // Kasih nama file dinamis pakai tanggal hari ini
+       
         $namaFile = 'Data_Guru_' . date('Ymd_His') . '.xlsx';
         
         return Excel::download(new GuruExport, $namaFile);
@@ -70,7 +70,7 @@ class Index extends Component
             $sebagaiWaliKelas = \App\Models\Kelas::where('guru_id', $guru->id)->exists();
             
             if ($sebagaiWaliKelas) {
-                // BLOKIR! Jangan hapus apapun
+              
                 $this->dispatch('swal:error', [
                     'title' => 'Ditolak!',
                     'text'  => "Guru ini masih terdaftar sebagai Wali Kelas. Silakan ganti Wali Kelas tersebut di Manajemen Kelas terlebih dahulu."

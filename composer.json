@@ -11,9 +11,11 @@
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.6.4",
         "livewire/volt": "^1.7.0",
-        "maatwebsite/excel": "^3.1"
+        "maatwebsite/excel": "^3.1",
+        "simplesoftwareio/simple-qrcode": "^4.2"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.7",
         "fakerphp/faker": "^1.23",
         "laravel/breeze": "^2.4",
         "laravel/pail": "^1.2.2",

@@ -13,15 +13,21 @@ class Absensi extends Model
     protected $table = 'absensis'; 
     protected $guarded = ['id'];
 
-    // Relasi ke Siswa
     public function siswa()
     {
         return $this->belongsTo(Siswa::class);
     }
 
-    // Relasi ke Jadwal Mapel
+    public function sesiAbsensi()
+    {
+        return $this->belongsTo(SesiAbsensi::class, 'sesi_absensi_id')->withTrashed();
+    }
+
+   
     public function guruMapel()
     {
-        return $this->belongsTo(guruMapel::class); // Pastikan lo bikin Model Jadwal nanti
+        return $this->belongsTo(guruMapel::class); 
     }
+
+    
 }

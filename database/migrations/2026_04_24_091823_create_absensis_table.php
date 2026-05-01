@@ -9,21 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('absensis', function (Blueprint $table) {
-            $table->id();
-            
-            // Relasi Utama
+          $table->id();
+            $table->foreignId('sesi_absensi_id')->constrained('sesi_absensis')->cascadeOnDelete();
             $table->foreignId('siswa_id')->constrained('siswas')->cascadeOnDelete();
-            
-            $table->foreignId('guru_mapel_id')->constrained('guru_mapels')->cascadeOnDelete();
-            
-            // Data Kehadiran
-            $table->date('tanggal');
-            $table->time('waktu')->nullable()->comment('Waktu tepat saat siswa scan QR');
-            $table->enum('status', ['hadir', 'izin', 'sakit', 'alpa','terlambar']);
-            
+         
+            $table->time('waktu_scan')->nullable()->comment('Waktu tepat saat siswa berhasil scan');
+         
+            $table->enum('status', ['hadir', 'izin', 'sakit', 'alpa', 'terlambat'])->default('alpa');
     
-            $table->string('lokasi')->nullable()->comment('Format: lat,long');
-            
             $table->text('keterangan')->nullable();
 
             $table->timestamps();

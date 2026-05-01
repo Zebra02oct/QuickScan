@@ -10,24 +10,15 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-// Perhatikan interfaces yang dipakai: FromQuery dan WithMapping
+
 class SiswaExport implements FromQuery, WithMapping, WithHeadings, ShouldAutoSize, WithStyles
 {
-    /**
-     * MAGIC 1: FromQuery
-     * Jangan pakai get() atau all() di sini! 
-     * Cukup return Query Builder-nya aja. Maatwebsite yang bakal ngurusin potong-potong datanya (Chunk).
-     * Pakai with() untuk Eager Loading biar nggak kena N+1 Query Problem yang bikin lambat!
-     */
+    
     public function query()
     {
         return Siswa::query()->with(['user', 'kelas'])->orderBy('kelas_id');
     }
 
-    /**
-     * MAGIC 2: WithMapping
-     * Di sini kita map/cocokin data dari database ke kolom Excel baris demi baris secara stream.
-     */
     public function map($siswa): array
     {
         return [
@@ -55,9 +46,7 @@ class SiswaExport implements FromQuery, WithMapping, WithHeadings, ShouldAutoSiz
         ];
     }
 
-    /**
-     * Style Header (Biar kelihatan profesional)
-     */
+  
     public function styles(Worksheet $sheet)
     {
         return [
@@ -65,7 +54,7 @@ class SiswaExport implements FromQuery, WithMapping, WithHeadings, ShouldAutoSiz
                 'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'startColor' => ['argb' => 'FF4F46E5'] // Warna background header Indigo
+                    'startColor' => ['argb' => 'FF4F46E5']
                 ]
             ],
         ];

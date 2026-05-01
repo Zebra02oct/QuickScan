@@ -17,9 +17,6 @@ class Guru extends Model
         'jenis_kelamin',
     ];
 
-    /**
-     * Relasi ke data User
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -31,9 +28,7 @@ class Guru extends Model
     }
 
  
-    /**
-     * Relasi ke histori absensi yang pernah dilakukan guru ini
-     */
+  
     public function absensis(): HasMany
     {
         return $this->hasMany(Absensi::class);

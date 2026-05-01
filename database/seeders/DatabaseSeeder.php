@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Buat Superadmin
+      
         User::create([
             'name' => 'Super Admin SMK',
             'email' => 'super@admin.com',
@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             'status' => 'aktif',
         ]);
 
-        // 2. Buat Admin
+       
         User::create([
             'name' => 'Admin Absensi',
             'email' => 'admin@gmail.com',
@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             'status' => 'aktif',
         ]);
 
-        // 3. Buat Data Guru (Contoh 2 Guru)
+       
         $dataGuru = [
             [
                 'name' => 'Budi Santoso, S.Kom',
@@ -62,7 +62,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // 4. Buat Data Siswa (Contoh 2 Siswa)
+      
         $dataSiswa = [
             [
                 'name' => 'Ahmad Fauzi',
@@ -91,7 +91,7 @@ class DatabaseSeeder extends Seeder
             Siswa::create([
                 'user_id' => $user->id,
                 'nisn' => $s['nisn'],
-                // 'id_kelas' => 1, // Diisi nanti setelah tabel kelas ada
+              
             ]);
         }
     }

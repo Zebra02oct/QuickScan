@@ -78,7 +78,7 @@ public function isSiswa() { return $this->role === 'siswa'; }
 
  public function getAvatarUrlAttribute(): string
     {
-        // 3. KODE ASLI KAMU: Fallback UI Avatars
+       
         return 'https://ui-avatars.com/api/?name='
             . urlencode($this->name ?: 'User')
             . '&size=64&background=E0E7FF&color=3730A3&format=svg';

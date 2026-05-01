@@ -21,17 +21,12 @@ class Siswa extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relasi ke Kelas (Posisi Siswa saat ini)
-     */
+   
     public function kelas(): BelongsTo
     {
         return $this->belongsTo(Kelas::class);
     }
 
-    /**
-     * Relasi ke histori absensi
-     */
     public function absensis(): HasMany
     {
         return $this->hasMany(Absensi::class);
