@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('kelas_id')->nullable()->constrained('kelas')->nullOnDelete();
             $table->string('nisn')->unique();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

@@ -64,58 +64,60 @@ class Index extends Component
         return Excel::download(new SiswaExport, $namaFile);
     }
 
-  #[On('hapus-data-siswa')]
-    public function hapusDataSiswa($id)
-    {
-        $siswa = Siswa::find($id);
+ #[On('hapus-data-siswa')]
+public function hapusDataSiswa($id)
+{
+    $siswa = \App\Models\Siswa::find($id);
 
-        if (!$siswa) {
-            $this->dispatch('swal:error', [
-                'title' => 'Gagal!',
-                'text'  => 'Data siswa tidak ditemukan di sistem.'
-            ]);
-            return;
-        }
-
-        DB::beginTransaction();
-
-        try {
-            $punyaAbsensi = Siswa::where('id', $id)->whereHas('absensis')->exists();
-            $user = User::find($siswa->user_id);
-
-            if ($punyaAbsensi) {
-            
-                $siswa->delete(); 
-        
-                if ($user) {
-                    $user->delete(); 
-                }
-
-               
-            } else {
-              
-                $siswa->forceDelete();
-                
-                if ($user) {
-                    $user->forceDelete(); 
-                }
-            }
-
-            DB::commit();
-
-            $this->dispatch('swal:success', [
-                'title' => 'Berhasil Dihapus!',
-                'text'  => 'Data Mahasiswa Berhasil Dihapus'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $this->dispatch('swal:error', [
-                'title' => 'Error Sistem!',
-                'text'  => 'Gagal menghapus data: ' . $e->getMessage()
-            ]);
-        }
+    if (!$siswa) {
+        $this->dispatch('swal:error', [
+            'title' => 'Gagal!',
+            'text'  => 'Data siswa tidak ditemukan di sistem.'
+        ]);
+        return;
     }
+
+    DB::beginTransaction();
+
+    try {
+        $punyaAbsensi = $siswa->absensis()->exists(); 
+        $user = \App\Models\User::find($siswa->user_id);
+
+        if ($punyaAbsensi) {
+          
+            DB::rollBack(); 
+            
+            $this->dispatch('swal:error', [
+                'title' => 'Aksi Ditolak!',
+                'text'  => "Data {$siswa->nama} tidak bisa dihapus karena sudah memiliki riwayat absensi. Silakan Edit dan ubah statusnya menjadi 'Nonaktif', 'Lulus', atau 'Pindah'!"
+            ]);
+            
+            return;
+        } 
+  
+        $siswa->delete();
+        
+        if ($user) {
+            $user->delete(); 
+        }
+
+        DB::commit();
+
+        $this->dispatch('swal:success', [
+            'title' => 'Berhasil Dihapus!',
+            'text'  => 'Data Siswa dan Akun berhasil dihapus.'
+        ]);
+
+        $this->dispatch('refresh-siswa');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        $this->dispatch('swal:error', [
+            'title' => 'Error Sistem!',
+            'text'  => 'Gagal menghapus data: ' . $e->getMessage()
+        ]);
+    }
+}
 
     public function render()
     {

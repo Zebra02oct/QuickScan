@@ -20,8 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
 public function boot(): void
     {
-        // PAKSA HTTPS KALAU LAGI PAKE NGROK
-        // Biar Livewire nggak error "Mixed Content"
+       
         if (request()->server('HTTP_X_FORWARDED_PROTO') == 'https') {
             URL::forceScheme('https');
         }

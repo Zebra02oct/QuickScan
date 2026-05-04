@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Absensi extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $table = 'absensis'; 
     protected $guarded = ['id'];
@@ -20,14 +20,11 @@ class Absensi extends Model
 
     public function sesiAbsensi()
     {
-        return $this->belongsTo(SesiAbsensi::class, 'sesi_absensi_id')->withTrashed();
+        return $this->belongsTo(SesiAbsensi::class, 'sesi_absensi_id');
     }
 
    
-    public function guruMapel()
-    {
-        return $this->belongsTo(guruMapel::class); 
-    }
+
 
     
 }

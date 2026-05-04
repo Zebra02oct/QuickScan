@@ -94,8 +94,15 @@
                         <select id="kelas" wire:model="kelas"
                             class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm transition-colors py-2.5">
                             <option value="">Pilih Kelas</option>
+
                             @foreach ($this->listKelas as $kls)
-                                <option value="{{ $kls->id }}">{{ $kls->nama_kelas }}</option>
+                                <option value="{{ $kls->id }}" @class(['text-red-500' => !$kls->is_active])
+                                    {{ $kelas == $kls->id ? 'selected' : '' }}>
+
+                                    {{ $kls->nama_kelas }}
+                                    {{ !$kls->is_active ? '(Nonaktif)' : '' }}
+
+                                </option>
                             @endforeach
                         </select>
                         @error('kelas')

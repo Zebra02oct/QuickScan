@@ -57,7 +57,7 @@ class Index extends Component
     #[On('hapus-data-guru')]
     public function hapusDataGuru($id)
     {
-        $guru = Guru::find($id);
+        $guru = Guru::with('user')->find($id);
 
         if (!$guru) {
             $this->dispatch('swal:error', ['title' => 'Gagal!', 'text' => 'Data guru tidak ditemukan.']);
@@ -67,48 +67,60 @@ class Index extends Component
         DB::beginTransaction();
 
         try {
-            $sebagaiWaliKelas = \App\Models\Kelas::where('guru_id', $guru->id)->exists();
-            
-            if ($sebagaiWaliKelas) {
-              
-                $this->dispatch('swal:error', [
-                    'title' => 'Ditolak!',
-                    'text'  => "Guru ini masih terdaftar sebagai Wali Kelas. Silakan ganti Wali Kelas tersebut di Manajemen Kelas terlebih dahulu."
-                ]);
-                return; 
-            }
+            $namaGuru = $guru->user->nama;
+           $punyaAbsensi = \App\Models\GuruMapel::where('guru_id', $guru->id)
+                            ->whereHas('sesiAbsensis')
+                            ->exists();
 
-            $guruMapel = \App\Models\GuruMapel::where('guru_id', $guru->id)->exists();
-
-            $user = User::find($guru->user_id);
-
-            if ($guruMapel) {
-                $guru->delete(); 
-                if ($user) $user->delete(); 
-                
-              
-            } else {
-             
-                $guru->forceDelete();
-                if ($user) $user->forceDelete();
-            }
-
-            DB::commit();
-
-            $this->dispatch('swal:success', [
-                'title' => 'Berhasil!',
-                'text'  => "Data Guru Berhasil Dihapus",
-            ]);
-            $this->dispatch('refresh-guru');
-
-        } catch (\Exception $e) {
+            if ($punyaAbsensi) {
             DB::rollBack();
             $this->dispatch('swal:error', [
-                'title' => 'Error Sistem!',
-                'text'  => 'Gagal menghapus data: ' . $e->getMessage()
+     'title' => 'Aksi Ditolak!',
+'text'  => "Guru {$namaGuru} memiliki riwayat mengajar atau absensi. Penghapusan tidak dapat dilakukan. Silakan ubah status menjadi Nonaktif atau hapus riwayat absensi terlebih dahulu."
             ]);
+            return;
         }
+
+$sebagaiWaliKelas = \App\Models\Kelas::where('guru_id', $guru->id)->exists();
+            
+            if ($sebagaiWaliKelas) {
+            DB::rollBack();
+            $this->dispatch('swal:error', [
+                'title' => 'Aksi Ditolak!',
+                'text'  => "Guru {$namaGuru} masih menjabat sebagai Wali Kelas. Silakan ganti Wali Kelas di menu Manajemen Kelas terlebih dahulu."
+            ]);
+            return;
+        }
+
+        \App\Models\GuruMapel::where('guru_id', $guru->id)->delete();
+
+        $user = \App\Models\User::find($guru->user_id);
+        
+     
+        $guru->delete();
+
+    
+        if ($user) {
+            $user->delete();
+        }
+
+        DB::commit();
+
+        $this->dispatch('swal:success', [
+            'title' => 'Berhasil Dihapus!',
+            'text'  => "Data Guru {$namaGuru} berhasil dihapus."
+        ]);
+
+        $this->dispatch('refresh-guru');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        $this->dispatch('swal:error', [
+            'title' => 'Error Sistem!',
+            'text'  => 'Gagal menghapus data guru: ' . $e->getMessage()
+        ]);
     }
+}
 
     public function render()
     {

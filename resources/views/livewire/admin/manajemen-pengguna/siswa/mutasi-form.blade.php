@@ -22,7 +22,9 @@
                             class="block w-full rounded-xl border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 bg-white">
                             <option value="">Pilih Kelas</option>
                             @foreach ($this->listKelas as $kls)
-                                <option value="{{ $kls->id }}">{{ $kls->nama_kelas }}</option>
+                                <option value="{{ $kls->id }}" @class(['text-red-500' => !$kls->is_active])>
+                                    {{ $kls->nama_kelas }} {{ !$kls->is_active ? '(Nonaktif)' : '' }}
+                                </option>
                             @endforeach
                         </select>
                         @error('kelas_asal_id')

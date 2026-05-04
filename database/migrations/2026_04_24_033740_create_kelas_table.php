@@ -17,12 +17,12 @@ return new class extends Migration
                   ->nullable()
                   ->constrained('gurus')
                   ->nullOnDelete();
+        $table->boolean('is_active')->default(1);
 
  $table->string('tingkat', 10); 
             $table->string('jurusan', 50); 
             $table->string('nama_kelas')->unique();
     $table->timestamps();
-    $table->softDeletes();
 });
     }
 

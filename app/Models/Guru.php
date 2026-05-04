@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Guru extends Model
 {
-    use SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -27,8 +26,6 @@ class Guru extends Model
         return $this->hasMany(GuruMapel::class);
     }
 
- 
-  
     public function absensis(): HasMany
     {
         return $this->hasMany(Absensi::class);

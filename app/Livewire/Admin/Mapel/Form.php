@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Mapel;
 
 use App\Models\Mapel;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class Form extends Component
@@ -12,13 +13,23 @@ class Form extends Component
     public $nama_mapel = '';
     public $kategori = 'umum'; 
 
+    //helper
+    public $is_duplicate_name = false;
+    public $has_attendance_history = false;
+    public $original_nama_mapel = '';
+
     protected function rules()
     {
         return [
             'nama_mapel' => 'required|string|max:255',
             'kategori'   => 'required|in:umum,kejuruan',
-          
-            'kode_mapel' => 'required|string|max:50|unique:mapels,kode_mapel,' . $this->mapel_id,
+            'kode_mapel' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('mapels', 'kode_mapel')
+                    ->ignore($this->mapel_id),   
+            ],
         ];
     }
 
@@ -75,9 +86,23 @@ public function generateKode()
         }
     }
 
+    public function checkDuplicateName()
+    {
+        if (!empty($this->nama_mapel)) {
+            $query = Mapel::where('nama_mapel', strtolower(trim($this->nama_mapel)));
+            if ($this->mapel_id) {
+                $query->where('id', '!=', $this->mapel_id);
+            }
+            $this->is_duplicate_name = $query->exists();
+        } else {
+            $this->is_duplicate_name = false;
+        }
+    }
+
     public function updatedNamaMapel($value)
     {
         $this->generateKode();
+        $this->checkDuplicateName();
         $this->validateOnly('nama_mapel');
     }
 
@@ -104,6 +129,11 @@ public function generateKode()
                 $this->kode_mapel = $data->kode_mapel;
                 $this->nama_mapel = $data->nama_mapel;
                 $this->kategori   = $data->kategori;
+
+                $this->original_nama_mapel = $this->nama_mapel;
+                $this->has_attendance_history = \App\Models\GuruMapel::where('mapel_id', $id)
+                                                    ->whereHas('sesiAbsensis')
+                                                    ->exists();
             }
         }
     }
@@ -128,7 +158,7 @@ public function generateKode()
         $this->dispatch('refresh-mapel');
         
         $this->dispatch('swal:success', [
-            'title' => 'Mantap!',
+            'title' => 'Berhasil!',
             'text'  => 'Data Mata Pelajaran berhasil disimpan.'
         ]);
     }

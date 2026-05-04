@@ -53,6 +53,7 @@
                             <th class="px-3 sm:px-4 py-2.5 sm:py-3 text-center">Jurusan</th>
                             <th class="px-3 sm:px-4 py-2.5 sm:py-3 text-center">Wali</th>
                             <th class="px-3 sm:px-4 py-2.5 sm:py-3 text-center">Jumlah Siswa</th>
+                            <th class="px-3 sm:px-4 py-2.5 sm:py-3 text-center">Status</th>
                             <th class="px-3 sm:px-4 py-2.5 sm:py-3 text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -103,6 +104,20 @@
                                         <span
                                             class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[11px] sm:text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-100 shadow-sm">
                                             <i class="ri-user-unfollow-line mr-1"></i> Kosong
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <td class="px-3 sm:px-4 py-2 sm:py-3 text-center whitespace-nowrap">
+                                    @if ($row->is_active)
+                                        <span
+                                            class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[11px] sm:text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm">
+                                            Aktif
+                                        </span>
+                                    @else
+                                        <span
+                                            class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[11px] sm:text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-100 shadow-sm">
+                                            Non Aktif
                                         </span>
                                     @endif
                                 </td>

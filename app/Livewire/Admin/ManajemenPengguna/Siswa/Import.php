@@ -76,7 +76,7 @@ class Import extends Component
     public function render()
     {
         return view('livewire.admin.manajemen-pengguna.siswa.import', [
-            'list_kelas' => Kelas::orderBy('tingkat')->orderBy('nama_kelas')->get()
+            'list_kelas' => Kelas::where('is_active', true)->orderBy('tingkat')->orderBy('nama_kelas')->get()
         ]);
     }
 }

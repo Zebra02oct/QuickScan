@@ -2,6 +2,8 @@
 
 use App\Livewire\Admin\GuruMapel\index as GuruMapel;
 use App\Livewire\Admin\Kelas\Index as ManajemenKelas;
+use App\Livewire\Admin\ManajemenAbsensi\Detail;
+use App\Livewire\Admin\ManajemenAbsensi\Index as ManajemenAbsensiForAdmin;
 use App\Livewire\Admin\ManajemenPengguna\Guru\Index as ManajemenGuru;
 use App\Livewire\Admin\ManajemenPengguna\Siswa\Import as ImportDataSiswa;
 use App\Livewire\Admin\ManajemenPengguna\Siswa\Index as ManajemenSiswa;
@@ -40,6 +42,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/manajemen-kelas', ManajemenKelas::class)->name('admin.kelas.index');
     Route::get('/manajemen-mapel', ManajuemenMapel::class)->name('admin.mapel.index');
     Route::get('/manajemen-guru-mapel', GuruMapel::class)->name('admin.guruMapel.index');
+      Route::get('/manajemen-absensi', ManajemenAbsensiForAdmin::class)->name('admin.manajemenAbsensi.index');
+            Route::get('/manajemenAbsensi/{sesi_id}', Detail::class)->name('admin.manajemenAbsensi.detail');
 });
 
 Route::middleware(['auth' ,'role:guru'])->prefix('guru')->group(function () {

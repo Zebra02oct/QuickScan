@@ -18,7 +18,6 @@ return new class extends Migration
 
     $table->enum('kategori', ['umum', 'kejuruan'])->default('umum');
     $table->timestamps();
-    $table->softDeletes();
         });
     }
 

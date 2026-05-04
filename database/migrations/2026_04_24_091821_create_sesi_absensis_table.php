@@ -26,7 +26,6 @@ return new class extends Migration
             $table->enum('status', ['berjalan', 'selesai'])->default('berjalan');
             
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

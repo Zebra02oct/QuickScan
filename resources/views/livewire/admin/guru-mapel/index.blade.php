@@ -43,8 +43,26 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 border-t border-gray-200/60">
+              
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t border-gray-200/60">
+
+                    <!-- Filter Status -->
                     <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1.5 ml-1">
+                            Status Penugasan
+                        </label>
+                        <select wire:model.live="filter_status"
+                            class="w-full py-2 px-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all shadow-sm text-sm text-gray-600 bg-white">
+                            <option value="1">Aktif Berjalan</option>
+                            <option value="0">Nonaktif </option>
+                        </select>
+                    </div>
+
+                   
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1.5 ml-1">
+                            Filter Kelas
+                        </label>
                         <select wire:model.live="filter_kelas"
                             class="w-full py-2 px-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all shadow-sm text-sm text-gray-600 bg-white">
                             <option value="">Semua Kelas</option>
@@ -54,7 +72,11 @@
                         </select>
                     </div>
 
+                  
                     <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1.5 ml-1">
+                            Filter Mata Pelajaran
+                        </label>
                         <select wire:model.live="filter_mapel"
                             class="w-full py-2 px-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all shadow-sm text-sm text-gray-600 bg-white">
                             <option value="">Semua Mata Pelajaran</option>
@@ -64,6 +86,7 @@
                             @endforeach
                         </select>
                     </div>
+
                 </div>
             </div>
 
@@ -108,6 +131,7 @@
                                             <th class="px-4 text-center py-3">Kode Mapel</th>
                                             <th class="px-4 text-center py-3">Mata Pelajaran</th>
                                             <th class="px-4 py-3 text-center">Kelas</th>
+                                            <th class="px-4 py-3 text-center">Status</th>
                                             <th class="px-4 py-3 text-center">Aksi</th>
                                         </tr>
                                     </thead>
@@ -136,6 +160,21 @@
                                                         {{ $item->kelas->nama_kelas ?? '-' }}
                                                     </span>
                                                 </td>
+
+                                                <td class="px-3 sm:px-4 py-2 sm:py-3 text-center whitespace-nowrap">
+                                                    @if ($item->is_active)
+                                                        <span
+                                                            class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[11px] sm:text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm">
+                                                            Aktif
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[11px] sm:text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-100 shadow-sm">
+                                                            Non Aktif
+                                                        </span>
+                                                    @endif
+                                                </td>
+
                                                 <td class="px-4 py-3 text-center whitespace-nowrap">
                                                     <div class="flex items-center justify-center gap-2">
                                                         <button

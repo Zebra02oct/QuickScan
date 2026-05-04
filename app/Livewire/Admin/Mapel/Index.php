@@ -42,44 +42,48 @@ class Index extends Component
         ]);
     }
 
-  #[On('hapus-mapel')]
-    public function hapusDataMapel($id)
-    {
-        $mapel = \App\Models\Mapel::find($id);
+#[On('hapus-mapel')]
+public function hapusDataMapel($id)
+{
+    $mapel = \App\Models\Mapel::find($id);
 
-        if (!$mapel) {
-            $this->dispatch('swal:error', ['title' => 'Gagal!', 'text' => 'Data Mapel tidak ditemukan.']);
-            return;
-        }
-
-        DB::beginTransaction();
-
-        try {
-
-            $guruMapel = \App\Models\GuruMapel::where('mapel_id', $mapel->id)->exists();
-
-            if ($guruMapel) {
-                $mapel->delete();
-                $pesan = 'Mapel berhasil di hapus (soft delete).';
-            } else {
-                $mapel->forceDelete();
-                $pesan = 'Mapel berhasil dihapus.';
-            }
-
-            DB::commit();
-
-            $this->dispatch('swal:success', [
-                'title' => 'Berhasil!',
-                'text'  => $pesan
-            ]);
-            $this->dispatch('refresh-mapel');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $this->dispatch('swal:error', [
-                'title' => 'Error Sistem!',
-                'text'  => 'Gagal menghapus mapel: ' . $e->getMessage()
-            ]);
-        }
+    if (!$mapel) {
+        $this->dispatch('swal:error', ['title' => 'Gagal!', 'text' => 'Data Mapel tidak ditemukan.']);
+        return;
     }
+    $namaMapel = $mapel->nama_mapel; 
+
+   
+    $punyaPenugasan = \App\Models\GuruMapel::where('mapel_id', $mapel->id)->exists();
+    
+    if ($punyaPenugasan) {
+        $this->dispatch('swal:error', [
+            'title' => 'Aksi Ditolak!',
+            'text'  => "Mata pelajaran {$namaMapel} masih terhubung dengan jadwal Penugasan Guru. Penghapusan tidak dapat dilakukan sebelum penugasan tersebut dihapus!"
+        ]);
+        return;
+    }
+
+    DB::beginTransaction();
+
+    try {
+        $mapel->delete();
+
+        DB::commit();
+
+        $this->dispatch('swal:success', [
+            'title' => 'Berhasil!',
+            'text'  => "Mata pelajaran {$namaMapel} berhasil dihapus."
+        ]);
+        
+        $this->dispatch('refresh-mapel');
+
+    } catch (\Exception $e) {
+        DB::rollBack(); 
+        $this->dispatch('swal:error', [
+            'title' => 'Error Sistem!',
+            'text'  => 'Gagal menghapus mapel: ' . $e->getMessage()
+        ]);
+    }
+}
 }

@@ -44,13 +44,18 @@ class BukaSesiAbsen extends Component
     public function listMapel()
     {
         $guruId = Auth::user()->guru->id;
+        
         return GuruMapel::with('mapel')
             ->where('guru_id', $guruId)
+            ->where('is_active', 1) //
+            ->whereHas('mapel')  
             ->get()
             ->unique('mapel_id');
     }
 
-   #[Computed]
+  
+
+    #[Computed]
     public function listKelas()
     {
         if (!$this->mapel_id) {
@@ -64,6 +69,10 @@ class BukaSesiAbsen extends Component
             }])
             ->where('guru_id', $guruId)
             ->where('mapel_id', $this->mapel_id)
+            ->where('is_active', 1) 
+            ->whereHas('kelas', function ($q) {
+                $q->where('is_active', 1);
+            })
             ->get();
     }
 

@@ -11,10 +11,23 @@
             $wire.loadData($event.detail.id).then(() => isLoading = false);
         ">
 
+        
+        @if ($mapel_id && $has_attendance_history && strtolower(trim($nama_mapel)) !== strtolower(trim($original_nama_mapel)))
+            <div class="bg-rose-50 border-l-4 border-rose-500 p-4 mb-4 mx-6 mt-4 transition-all duration-300">
+                <div class="flex items-start">
+                    <i class="ri-alert-fill text-rose-500 mr-3 text-xl mt-0.5"></i>
+                    <p class="text-sm text-rose-800 leading-relaxed">
+                        <strong>PERHATIAN!</strong> Mata pelajaran ini sudah memiliki riwayat absensi.
+                        Mengubah nama Mapel akan ikut merubah label nama pada laporan histori absensi di masa lalu.
+                    </p>
+                </div>
+            </div>
+        @endif
+
         <form id="formSaveMapel"
             @submit.prevent="$dispatch('is-saving', true); $wire.save().finally(() => $dispatch('is-saving', false))">
 
-            <div class="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar flex flex-col gap-5">
+            <div class="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar flex flex-col gap-5 pt-2">
 
                 <div>
                     <label for="nama_mapel" class="block text-sm font-medium text-gray-700 mb-1">
@@ -23,9 +36,22 @@
                     <input type="text" id="nama_mapel" wire:model.live="nama_mapel"
                         placeholder="Contoh: Pemrograman Web"
                         class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors">
+
                     @error('nama_mapel')
                         <span class="text-rose-500 text-xs mt-1.5 block font-medium">{{ $message }}</span>
                     @enderror
+
+                    <!-- 🔥 ALERT 2: WARNING NAMA DUPLIKAT -->
+                    @if ($is_duplicate_name)
+                        <div
+                            class="mt-2 flex items-start gap-2 bg-amber-50 text-amber-700 p-2.5 rounded-lg border border-amber-200 animate-fade-in-up">
+                            <i class="ri-error-warning-fill mt-0.5"></i>
+                            <p class="text-xs font-medium leading-relaxed">
+                                Nama Mapel ini sudah terdaftar di database. Sistem tetap mengizinkan penyimpanan karena
+                                Kode Mapel akan dibedakan secara otomatis. Yakin ingin membuat duplikat?
+                            </p>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -53,7 +79,6 @@
                             class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors">
                             <option value="umum">Umum</option>
                             <option value="kejuruan">Kejuruan</option>
-
                         </select>
                         @error('kategori')
                             <span class="text-rose-500 text-xs mt-1.5 block font-medium">{{ $message }}</span>

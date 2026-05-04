@@ -26,10 +26,13 @@ class MutasiForm extends Component
         $this->resetValidation();
     }
 
-      #[Computed]
+    #[Computed]
     public function listKelas()
     {
-        return Kelas::select('id', 'nama_kelas')->orderBy('tingkat')->orderBy('nama_kelas')->get();
+        return Kelas::select('id', 'nama_kelas', 'is_active')
+            ->orderBy('tingkat')
+            ->orderBy('nama_kelas')
+            ->get();
     }
 
     public function updatedKelasAsalId($value)
@@ -56,11 +59,15 @@ class MutasiForm extends Component
             
                 $tingkat = strtoupper($kelasAsal->tingkat); 
 
-                if ($tingkat === 'X' ) {
-                    $this->list_kelas_tujuan = Kelas::whereIn('tingkat', ['XI'])->get();
+             if ($tingkat === 'X' ) {
+                    $this->list_kelas_tujuan = Kelas::whereIn('tingkat', ['XI'])
+                                                    ->where('is_active', 1)
+                                                    ->get();
                 } 
                 elseif ($tingkat === 'XI') {
-                    $this->list_kelas_tujuan = Kelas::whereIn('tingkat', ['XII'])->get();
+                    $this->list_kelas_tujuan = Kelas::whereIn('tingkat', ['XII'])
+                                                    ->where('is_active', 1)
+                                                    ->get();
                 } 
                 elseif ($tingkat === 'XII' ) {
                     $this->is_lulus = true;

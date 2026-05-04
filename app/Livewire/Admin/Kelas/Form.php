@@ -1,8 +1,10 @@
 <?php
+
 namespace App\Livewire\Admin\Kelas;
 
 use App\Models\Guru;
 use App\Models\Kelas;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -14,10 +16,15 @@ class Form extends Component
     public $rombel = ''; 
     public $nama_kelas = '';
     public $guru_id = ''; 
+    
+    public $is_active = 1; 
 
     public $original_tingkat;
     public $original_jurusan;
     public $original_rombel;
+    
+   
+    public $original_is_active; 
 
     protected function rules()
     {
@@ -25,11 +32,13 @@ class Form extends Component
             'tingkat' => 'required|string',
             'jurusan' => 'required|string',
             'rombel' => 'nullable|string',
-            'guru_id' => 'nullable|exists:gurus,id', 
+         'guru_id' => 'required|exists:gurus,id',
+            'is_active' => 'required|boolean', 
             'nama_kelas' => [
                 'required',
                 'string',
-                'unique:kelas,nama_kelas,' . $this->kelas_id 
+                Rule::unique('kelas', 'nama_kelas')
+                    ->ignore($this->kelas_id),
             ],
         ];
     }
@@ -38,13 +47,29 @@ class Form extends Component
         'nama_kelas.unique' => 'Nama Kelas ini sudah terdaftar! Silakan cek kembali.',
         'tingkat.required'  => 'Tingkat wajib dipilih.',
         'jurusan.required'  => 'Jurusan wajib diisi.',
+        'is_active.required' => 'Status kelas wajib dipilih.',
+
+        'guru_id.required'  => 'Wali Kelas wajib dipilih.', 
+    'guru_id.exists'    => 'Data Wali Kelas tidak valid/tidak ditemukan.',
     ];
 
-    #[Computed]
-    public function listGuru()
-    {
-        return Guru::with('user')->get()->sortBy('user.name');
-    }
+  #[Computed]
+public function listGuru()
+{
+    return Guru::with('user')
+        ->where(function ($query) {
+            $query->whereHas('user', function ($q) {
+                $q->where('status', 'aktif');
+            });
+            if ($this->guru_id) {
+                $query->orWhere('id', $this->guru_id);
+            }
+        })
+        ->get()
+        ->sortBy(function ($guru) {
+            return $guru->user->name ?? 'ZZZ'; 
+        });
+}
 
     public function updated($property)
     {
@@ -58,14 +83,20 @@ class Form extends Component
     {
         $this->reset();
         $this->resetValidation();
+    
+        $this->is_active = 1; 
 
         if ($id) {
             $data = Kelas::find($id);
             if ($data) {
                 $this->kelas_id = $data->id;
                 $this->tingkat = $data->tingkat;
-                $this->guru_id = $data->guru_id;
+               $this->guru_id = $data->guru_id;
                 $this->jurusan = $data->jurusan;
+                
+                // Set Status
+                $this->is_active = $data->is_active;
+                $this->original_is_active = $data->is_active;
               
                 $nama_parts = explode(' ', $data->nama_kelas);
                 $this->rombel = end($nama_parts); 
@@ -73,8 +104,10 @@ class Form extends Component
                 $this->nama_kelas = $data->nama_kelas;
 
                 $this->original_tingkat = $data->tingkat;
-        $this->original_jurusan = $data->jurusan;
-        $this->original_rombel = end($nama_parts);
+                $this->original_jurusan = $data->jurusan;
+                $this->original_rombel = end($nama_parts);
+
+                
             }
         }
     }
@@ -91,6 +124,7 @@ class Form extends Component
                 'jurusan'    => strtoupper(trim($this->jurusan)),
                 'nama_kelas' => $this->nama_kelas,
                 'guru_id'    => $this->guru_id ?: null, 
+                'is_active'  => $this->is_active,
             ]
         );
 

@@ -3,7 +3,7 @@
     <div
         class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-200 gap-4">
 
-        <!-- INFO SESI LIVE -->
+     
         <div class="flex items-center gap-4">
             <div class="w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.6)]"></div>
             <div>
@@ -18,7 +18,6 @@
 
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
 
-            <!-- TOMBOL 1: BATALKAN SESI (HAPUS) -->
 
             <x-ui.button loadingText="Membatalkan Sesi" onclick="konfirmasiBatalSesi()" color="danger"
                 icon="ri-delete-bin-line" class="w-full sm:w-auto">
@@ -49,7 +48,7 @@
                     if (this.waktu <= 0) {
                         $wire.refreshQR();
                         this.waktu = 10;
-                        sessionStorage.setItem('sisaWaktuQR', this.waktu); // Simpan ulang memori
+                        sessionStorage.setItem('sisaWaktuQR', this.waktu); 
                     }
                 }, 1000);
             }
@@ -127,14 +126,14 @@
 
                                 <td class="px-5 py-3 text-center whitespace-nowrap">
                                     @if ($siswa['waktu_scan'])
-                                        <!-- JIKA SISWA SUDAH SCAN -->
+                                     
                                         <span
                                             class="inline-flex items-center gap-1 bg-gray-100 px-2.5 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium border border-gray-200 font-mono text-slate-600 shadow-sm">
                                             <i class="ri-time-line text-gray-400"></i>
                                             {{ $siswa['waktu_scan'] }}
                                         </span>
                                     @else
-                                        <!-- BADGE KHUSUS BUAT YANG NGGAK SCAN / BELUM SCAN -->
+                               
                                         <span
                                             class="inline-flex items-center gap-1 bg-slate-50 text-slate-500 px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium border border-slate-200 border-dashed"
                                             title="Tidak melakukan scan via sistem">

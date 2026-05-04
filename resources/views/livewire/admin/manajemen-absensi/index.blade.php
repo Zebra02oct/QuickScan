@@ -10,8 +10,8 @@
                     <i class='ri-folder-user-line text-2xl'></i>
                 </div>
                 <div>
-                    <h2 class="text-lg font-bold text-gray-800">Manajemen Absensi Kelas</h2>
-                    <p class="text-sm text-gray-500">Kelola dan pantau data presensi dari setiap pertemuan.</p>
+                    <h2 class="text-lg font-bold text-gray-800">Manajemen Absensi Kelas (Admin)</h2>
+                    <p class="text-sm text-gray-500">Kelola dan pantau semua data presensi sekolah.</p>
                 </div>
             </div>
 
@@ -26,9 +26,7 @@
         <div class="p-4 sm:p-5">
             <div class="bg-slate-50 p-5 rounded-xl border border-gray-100 mb-6 shadow-inner">
 
-            
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
-              
                     <div class="flex items-center gap-3 shrink-0">
                         <div
                             class="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-200 flex items-center justify-center text-gray-500">
@@ -40,51 +38,42 @@
                     <div class="relative w-full md:w-80">
                         <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input type="text" wire:model.live.debounce.300ms="search"
-                            placeholder="Cari nama kelas / mapel..."
+                            placeholder="Cari kelas, mapel, atau nama guru..."
                             class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all shadow-sm text-sm text-gray-600">
                     </div>
                 </div>
 
-               
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-200/60">
-
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Filter Kelas</label>
                         <select wire:model.live="filter_kelas_id"
                             class="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all shadow-sm text-sm text-gray-600">
                             <option value="">Semua Kelas</option>
                             @foreach ($this->daftarKelas as $kelas)
-                                @if ($kelas)
-                                    <option value="{{ $kelas->id }}">{{ $kelas->nama_kelas }}</option>
-                                @endif
+                                <option value="{{ $kelas->id }}">{{ $kelas->nama_kelas }}</option>
                             @endforeach
                         </select>
                     </div>
 
-                   
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Filter Mapel</label>
                         <select wire:model.live="filter_mapel_id"
                             class="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all shadow-sm text-sm text-gray-600">
                             <option value="">Semua Mata Pelajaran</option>
                             @foreach ($this->daftarMapel as $mapel)
-                                @if ($mapel)
-                                    <option value="{{ $mapel->id }}">{{ Str::title($mapel->nama_mapel) }}
-                                        ({{ $mapel->kode_mapel }})
-                                    </option>
-                                @endif
+                                <option value="{{ $mapel->id }}">{{ Str::title($mapel->nama_mapel) }}
+                                    ({{ $mapel->kode_mapel }})
+                                </option>
                             @endforeach
                         </select>
                     </div>
 
-                
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Dari Tanggal</label>
                         <input type="date" wire:model.live="tanggal_mulai"
                             class="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all shadow-sm text-sm text-gray-600">
                     </div>
 
-                  
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Sampai Tanggal</label>
                         <input type="date" wire:model.live="tanggal_akhir"
@@ -100,7 +89,6 @@
                         </button>
                     </div>
                 @endif
-
             </div>
 
             <div class="overflow-x-auto rounded-xl border border-gray-100 shadow-sm custom-scrollbar">
@@ -109,6 +97,7 @@
                         class="bg-gray-50 text-gray-600 font-semibold border-b border-gray-100 whitespace-nowrap text-xs sm:text-sm">
                         <tr>
                             <th class="px-3 sm:px-4 py-2.5 sm:py-3 text-center w-10">No</th>
+                            <th class="px-3 sm:px-4 py-2.5 sm:py-3 text-left">Guru</th>
                             <th class="px-3 sm:px-4 py-2.5 sm:py-3 text-left">Tgl & Status Sesi</th>
                             <th class="px-3 sm:px-4 py-2.5 sm:py-3 text-left">Informasi Kelas</th>
                             <th class="px-3 sm:px-4 py-2.5 sm:py-3 text-center">Hadir/Terlambat</th>
@@ -124,6 +113,14 @@
                                 <td
                                     class="px-3 sm:px-4 py-2 sm:py-3 text-center text-gray-500 whitespace-nowrap text-xs sm:text-sm">
                                     {{ $this->daftarSesi->firstItem() + $index }}
+                                </td>
+
+                                <td class="px-3 sm:px-4 py-2 sm:py-3 text-left whitespace-nowrap">
+                                    <span
+                                        class="px-2.5 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-700 border border-green-100">
+                                      
+                                        {{ $row->guruMapel->guru->user->name ?? 'Guru Tidak Diketahui' }}
+                                    </span>
                                 </td>
 
                                 <td class="px-3 sm:px-4 py-2 sm:py-3 text-left whitespace-nowrap">
@@ -178,47 +175,32 @@
                                         </span>
                                     @else
                                         <span
-                                            class="px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-50 text-gray-500 border border-gray-100">
-                                            0
-                                        </span>
+                                            class="px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-50 text-gray-500 border border-gray-100">0</span>
                                     @endif
                                 </td>
 
                                 <td class="px-3 sm:px-4 py-2 sm:py-3 text-center whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-1.5 sm:gap-2">
 
-                                        <a href="{{ route('guru.detailAbsensi', ['sesi_id' => $row->id]) }}"
+                                        <a href="{{ route('admin.manajemenAbsensi.detail', ['sesi_id' => $row->id]) }}"
                                             wire:navigate
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-50 text-sky-600 hover:bg-sky-500 hover:text-white transition-all shadow-sm border border-sky-100 hover:border-transparent">
                                             <i class="ri-eye-line"></i> Detail
                                         </a>
 
-                                        @php
-                                            $isLocked = \Carbon\Carbon::parse($row->created_at)->addDays(7)->isPast();
-                                        @endphp
-
-                                        @if (!$isLocked)
-                                            <button
-                                                onclick="konfirmasiHapusSesi({{ $row->id }} , @js($row->guruMapel->mapel->nama_mapel), @js(\Carbon\Carbon::parse($row->tanggal)->translatedFormat('l, d M Y')))"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all shadow-sm border border-rose-100 hover:border-transparent"
-                                                title="Hapus Sesi">
-                                                <i class="ri-delete-bin-line"></i> Hapus
-                                            </button>
-                                        @else
-                                            <div class="relative group"
-                                                title="Sesi terkunci, hubungi Admin untuk menghapus">
-                                                <button disabled
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed">
-                                                    <i class="ri-lock-2-line"></i> Terkunci
-                                                </button>
-                                            </div>
-                                        @endif
+                                    
+                                        <button
+                                            onclick="konfirmasiHapusSesi({{ $row->id }} , @js($row->guruMapel->mapel->nama_mapel), @js(\Carbon\Carbon::parse($row->tanggal)->translatedFormat('l, d M Y')))"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all shadow-sm border border-rose-100 hover:border-transparent"
+                                            title="Hapus Sesi secara Paksa">
+                                            <i class="ri-delete-bin-line"></i> Hapus
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="p-8 sm:p-12 text-center">
+                                <td colspan="8" class="p-8 sm:p-12 text-center">
                                     <div class="flex flex-col items-center justify-center">
                                         <div
                                             class="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 mb-3 sm:mb-4 shadow-inner border border-slate-100">
@@ -226,8 +208,8 @@
                                         </div>
                                         <h3 class="text-base sm:text-lg font-bold text-slate-800 mb-1">Belum Ada Sesi
                                         </h3>
-                                        <p class="text-xs sm:text-sm text-gray-500">Anda belum membuat sesi
-                                            absensi atau data tidak ditemukan.</p>
+                                        <p class="text-xs sm:text-sm text-gray-500">Data presensi tidak ditemukan
+                                            berdasarkan filter saat ini.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -241,24 +223,24 @@
                     {{ $this->daftarSesi->links() }}
                 </div>
             @endif
-
         </div>
-        <livewire:guru.modal-export-rekap :guruId="$this->guruId" />
+        <livewire:admin.manajemen-absensi.modal-export-rekap />
     </div>
+
     @push('scripts')
         <script>
             function konfirmasiHapusSesi(id, namaMapel, tanggal) {
                 Swal.fire({
-                    title: 'Hapus Sesi Absensi?',
+                    title: 'Hapus Paksa Sesi?',
                     html: `
-            <div class="text-slate-600 mb-2 text-sm leading-relaxed">
-                Apakah Anda yakin ingin menghapus data absen <b class="text-rose-600">${namaMapel}</b> pada tanggal absen ${tanggal}?
-            </div>
-            <div class="text-xs text-rose-500 bg-rose-50 p-2 rounded-lg mt-3 border border-rose-100">
-                <i class="ri-alert-line"></i> Peringatan: Semua data kehadiran siswa di sesi ini akan hilang permanen!
-            </div>
-        `,
-                    icon: 'error',
+                        <div class="text-slate-600 mb-2 text-sm leading-relaxed">
+                            Apakah Anda yakin ingin menghapus data absen <b class="text-rose-600">${namaMapel}</b> pada tanggal ${tanggal}?
+                        </div>
+                        <div class="text-xs text-rose-500 bg-rose-50 p-2 rounded-lg mt-3 border border-rose-100">
+                            <i class="ri-alert-line"></i> Peringatan Admin: Data absensi siswa akan hilang permanen!
+                        </div>
+                    `,
+                    icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: '<i class="ri-delete-bin-line mr-1"></i> Ya, Hapus',
                     cancelButtonText: 'Batal',
@@ -273,7 +255,6 @@
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-
                         Livewire.dispatch('hapus-data-absen', {
                             id: id
                         });
@@ -282,12 +263,8 @@
             }
 
             document.addEventListener('livewire:initialized', () => {
-
-
                 Livewire.on('swal:success', (data) => {
-
                     let info = data[0];
-
                     Swal.fire({
                         title: info.title,
                         text: info.text,
@@ -300,10 +277,8 @@
                     });
                 });
 
-
                 Livewire.on('swal:error', (data) => {
                     let info = data[0];
-
                     Swal.fire({
                         title: info.title,
                         text: info.text,
@@ -315,7 +290,6 @@
                         }
                     });
                 });
-
             });
         </script>
     @endpush

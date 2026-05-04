@@ -57,11 +57,21 @@ class Form extends Component
     ];
 
   
-    #[Computed]
-    public function listKelas()
-    {
-        return Kelas::select('id', 'nama_kelas')->orderBy('tingkat')->orderBy('nama_kelas')->get();
-    }
+   #[Computed]
+public function listKelas()
+{
+    return Kelas::select('id', 'nama_kelas', 'is_active') // Ambil juga is_active buat flag di UI
+        ->where(function ($query) {
+            $query->where('is_active', 1);
+
+            if ($this->kelas) {
+                $query->orWhere('id', $this->kelas);
+            }
+        })
+        ->orderBy('tingkat')
+        ->orderBy('nama_kelas')
+        ->get();
+}
 
     public function loadData($id = null)
     {

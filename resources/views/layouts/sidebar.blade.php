@@ -133,6 +133,24 @@
                             <span class="text-sm">Manajemen Guru Mapel</span>
                         </a>
                     </li>
+
+                    <p class="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-6 mb-3">Data Absensi
+                    </p>
+
+                    <li>
+                        <a href="{{ route('admin.manajemenAbsensi.index') }}" wire:navigate
+                            class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
+        {{ request()->routeIs('admin.manajemenAbsensi.index')
+            ? 'bg-sky-50 text-sky-600 font-semibold'
+            : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
+
+                            <i
+                                class="ri-folder-user-{{ request()->routeIs('admin.manajemenAbsensi.index') ? 'fill' : 'line' }} 
+           text-xl group-hover:animate-jiggle"></i>
+
+                            <span class="text-sm">Manajemen Absensi</span>
+                        </a>
+                    </li>
             </ul>
         </div>
         @endif

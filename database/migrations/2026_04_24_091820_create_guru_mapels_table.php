@@ -18,6 +18,7 @@ return new class extends Migration
         $table->foreignId('kelas_id')->constrained('kelas')->cascadeOnDelete();
         $table->foreignId('mapel_id')->constrained('mapels')->cascadeOnDelete();
         $table->foreignId('guru_id')->constrained('gurus')->cascadeOnDelete();
+        $table->boolean('is_active')->default(true);
 
 
         $table->timestamps();

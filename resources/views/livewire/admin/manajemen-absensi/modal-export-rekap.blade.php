@@ -1,38 +1,36 @@
 <div>
-    <x-modal-wrapper title="Export Rekap Absensi" icon="ri-file-excel-2-fill" iconColor="text-emerald-500" maxWidth="md"
+    <x-modal-wrapper title="Export Rekap Absensi (Admin)" icon="ri-file-excel-2-fill" iconColor="text-emerald-500"
+        maxWidth="md"
         @open-export-modal.window="
             isLoading = true; 
             openModal();
             $wire.loadData().then(() => isLoading = false);
         ">
 
-        <form id="formExportRekap"
+        <form id="formExportRekapAdmin"
             @submit.prevent="$dispatch('is-saving', true); $wire.exportExcel().finally(() => $dispatch('is-saving', false))">
 
             <div class="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar flex flex-col gap-5">
-
 
                 <div
                     class="bg-emerald-50 p-3.5 rounded-xl border border-emerald-100 flex gap-3 text-sm items-start shadow-sm">
                     <i class="ri-information-fill text-emerald-500 text-lg mt-0.5"></i>
                     <p class="text-emerald-800 text-xs sm:text-sm leading-relaxed">
                         Rekapitulasi kehadiran akan diunduh dalam format <b>.xlsx</b>. Silakan pilih kelas dan mata
-                        pelajaran yang ingin direkap.
+                        pelajaran yang ingin direkap. Data guru akan menyesuaikan secara otomatis.
                     </p>
                 </div>
 
-
+              
                 <div>
                     <label for="export_kelas_id" class="block text-sm font-medium text-gray-700 mb-1.5">
                         Pilih Kelas <span class="text-rose-500">*</span>
                     </label>
-                    <select id="export_kelas_id" wire:model="export_kelas_id"
+                    <select id="export_kelas_id" wire:model.live="export_kelas_id"
                         class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm transition-colors">
                         <option value="">Pilih Kelas</option>
                         @foreach ($this->daftarKelas as $kelas)
-                            @if ($kelas)
-                                <option value="{{ $kelas->id }}">{{ $kelas->nama_kelas }}</option>
-                            @endif
+                            <option value="{{ $kelas->id }}">{{ $kelas->nama_kelas }}</option>
                         @endforeach
                     </select>
                     @error('export_kelas_id')
@@ -40,24 +38,46 @@
                     @enderror
                 </div>
 
-
+             
                 <div>
                     <label for="export_mapel_id" class="block text-sm font-medium text-gray-700 mb-1.5">
                         Pilih Mata Pelajaran <span class="text-rose-500">*</span>
                     </label>
-                    <select id="export_mapel_id" wire:model="export_mapel_id"
+                    <select id="export_mapel_id" wire:model.live="export_mapel_id"
                         class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm transition-colors">
                         <option value="">Pilih Mata Pelajaran</option>
                         @foreach ($this->daftarMapel as $mapel)
-                            @if ($mapel)
-                                <option value="{{ $mapel->id }}">
-                                    {{ Str::title($mapel->nama_mapel) }}
-                                    ({{ $mapel->kode_mapel ? $mapel->kode_mapel : '' }})
-                                </option>
-                            @endif
+                            <option value="{{ $mapel->id }}">
+                                {{ Str::title($mapel->nama_mapel) }} ({{ $mapel->kode_mapel }})
+                            </option>
                         @endforeach
                     </select>
                     @error('export_mapel_id')
+                        <span class="text-rose-500 text-xs mt-1.5 block font-medium">{{ $message }}</span>
+                    @enderror
+                </div>
+
+               
+                <div class="animate-fade-in-down">
+                    <label for="export_guru_id" class="block text-sm font-medium text-gray-700 mb-1.5">
+                        Pilih Guru Pengampu <span class="text-rose-500">*</span>
+                    </label>
+                    <select id="export_guru_id" wire:model="export_guru_id"
+                        class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        {{ !$export_kelas_id || !$export_mapel_id ? 'disabled' : '' }}>
+
+                        @if (!$export_kelas_id || !$export_mapel_id)
+                            <option value="">Pilih Kelas & Mapel dulu...</option>
+                        @elseif ($this->daftarGuruPengampu->isEmpty())
+                            <option value="">Tidak ada guru di kombinasi Kelas dan mapel yang dipilih</option>
+                        @else
+                            <option value="">Pilih Guru...</option>
+                            @foreach ($this->daftarGuruPengampu as $guru)
+                                <option value="{{ $guru->id }}">{{ $guru->user->name }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                    @error('export_guru_id')
                         <span class="text-rose-500 text-xs mt-1.5 block font-medium">{{ $message }}</span>
                     @enderror
                 </div>
@@ -122,11 +142,11 @@
                         color="white" type="button">
                         Batal
                     </x-ui.button>
-                    <x-ui.button type="submit" form="formExportRekap" wire:target="exportExcel"
-                        class="w-full sm:w-auto" icon="ri-save-3-line" color="primary" loadingText="Menyiapkan File ">
+                 
+                    <x-ui.button type="submit" form="formExportRekapAdmin" wire:target="exportExcel"
+                        class="w-full sm:w-auto" icon="ri-save-3-line" color="primary" loadingText="Menyiapkan File...">
                         Download .xlsx
                     </x-ui.button>
-
                 </div>
             </x-slot>
 

@@ -34,8 +34,8 @@ class ModalExportRekap extends Component
 public function daftarKelas()
     {
         $guruMapelAktif = SesiAbsensi::select('guru_mapel_id')
-                                                 ->distinct()
-                                                 ->pluck('guru_mapel_id');
+                            ->distinct()
+                            ->pluck('guru_mapel_id');
 
         return GuruMapel::where('guru_id', $this->guruId)
             ->whereIn('id', $guruMapelAktif) 
@@ -52,8 +52,8 @@ public function daftarKelas()
     {
       
         $guruMapelAktif = SesiAbsensi::select('guru_mapel_id')
-                                                 ->distinct()
-                                                 ->pluck('guru_mapel_id');
+                            ->distinct()
+                            ->pluck('guru_mapel_id');
 
         return GuruMapel::where('guru_id', $this->guruId)
             ->whereIn('id', $guruMapelAktif)
@@ -64,7 +64,30 @@ public function daftarKelas()
             ->unique('id')
             ->values();
     }
-  
+
+    #[Computed]
+    public function infoSemesterBerjalan()
+    {
+        $sekarang = \Carbon\Carbon::now();
+        $tahunIni = $sekarang->year;
+        $bulanIni = $sekarang->month;
+
+        if ($bulanIni >= 7 && $bulanIni <= 12) {
+            $mulai = \Carbon\Carbon::create($tahunIni, 7, 1)->translatedFormat('d F Y');
+            $akhir = \Carbon\Carbon::create($tahunIni, 12, 31)->translatedFormat('d F Y');
+            $namaSemester = "Ganjil";
+        } else {
+            $mulai = \Carbon\Carbon::create($tahunIni, 1, 1)->translatedFormat('d F Y');
+            $akhir = \Carbon\Carbon::create($tahunIni, 6, 30)->translatedFormat('d F Y');
+            $namaSemester = "Genap";
+        }
+
+        return [
+            'teks' => "Data yang diexport mencakup Semester $namaSemester ($mulai - $akhir).",
+            'mulai' => $mulai,
+            'akhir' => $akhir
+        ];
+    }
 
     #[On('reset-modal')]
     public function resetForm()

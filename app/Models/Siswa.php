@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Siswa extends Model
 {
-    use SoftDeletes;
     protected $fillable = [
         'user_id',
         'nisn',

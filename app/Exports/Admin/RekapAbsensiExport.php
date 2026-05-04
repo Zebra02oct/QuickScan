@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Exports\Guru;
+namespace App\Exports\Admin;
 
 use App\Models\GuruMapel;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\SesiAbsensi;
 use App\Models\Siswa;
-use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -17,12 +15,13 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class RekapAbsensiExport implements FromView, ShouldAutoSize, WithStyles
 {
-    protected $kelas_id, $mapel_id, $export_type, $start_date, $end_date;
+    protected $kelas_id, $mapel_id, $guru_id, $export_type, $start_date, $end_date;
 
-    public function __construct($kelas_id, $mapel_id, $export_type, $start_date, $end_date)
+    public function __construct($kelas_id, $mapel_id, $guru_id, $export_type, $start_date, $end_date)
     {
         $this->kelas_id = $kelas_id;
         $this->mapel_id = $mapel_id;
+        $this->guru_id = $guru_id;
         $this->export_type = $export_type;
         $this->start_date = $start_date;
         $this->end_date = $end_date;
@@ -30,36 +29,29 @@ class RekapAbsensiExport implements FromView, ShouldAutoSize, WithStyles
 
     public function view(): View
     {
-        $guruId = Auth::user()->guru->id ?? 1; 
-        
-       
-        $guruMapel = GuruMapel::where('guru_id', $guruId)
+        $guruMapel = GuruMapel::with('guru.user')
+                              ->where('guru_id', $this->guru_id)
                               ->where('mapel_id', $this->mapel_id)
                               ->where('kelas_id', $this->kelas_id) 
                               ->first();
 
-       if (!$guruMapel) {
-          $daftarSesi = collect(); 
+        if (!$guruMapel) {
+            $daftarSesi = collect(); 
             $daftarSiswa = collect();
-    } else {
+        } else {
             $sesiQuery = SesiAbsensi::where('guru_mapel_id', $guruMapel->id);
 
-            
             if ($this->export_type === 'custom') {
-           
                 $sesiQuery->whereBetween('tanggal', [$this->start_date, $this->end_date]);
             } else {
-         
                 $sekarang = \Carbon\Carbon::now();
                 $tahunIni = $sekarang->year;
                 $bulanIni = $sekarang->month;
 
                 if ($bulanIni >= 7 && $bulanIni <= 12) {
-                  
                     $mulaiSemester = \Carbon\Carbon::create($tahunIni, 7, 1)->startOfDay();
                     $akhirSemester = \Carbon\Carbon::create($tahunIni, 12, 31)->endOfDay();
                 } else {
-                 
                     $mulaiSemester = \Carbon\Carbon::create($tahunIni, 1, 1)->startOfDay();
                     $akhirSemester = \Carbon\Carbon::create($tahunIni, 6, 30)->endOfDay();
                 }
@@ -67,10 +59,10 @@ class RekapAbsensiExport implements FromView, ShouldAutoSize, WithStyles
                 $sesiQuery->whereBetween('tanggal', [$mulaiSemester, $akhirSemester]);
             }
 
-
-       $daftarSesi = $sesiQuery->orderBy('tanggal', 'asc')->get();
+            $daftarSesi = $sesiQuery->orderBy('tanggal', 'asc')->get();
             $sesiIds = $daftarSesi->pluck('id')->toArray();
-if (empty($sesiIds)) {
+
+            if (empty($sesiIds)) {
                 $daftarSiswa = collect(); 
             } else {
                 $daftarSiswa = Siswa::whereHas('absensis', function($query) use ($sesiIds) {
@@ -94,7 +86,8 @@ if (empty($sesiIds)) {
             'daftarSiswa' => $daftarSiswa,
             'kelas'       => $kelas,
             'mapel'       => $mapel,
-            'guru'        => Auth::user()->guru ?? null 
+            // 🔥 LEMPAR DATA GURU BERDASARKAN HASIL QUERY, BUKAN DARI AUTH!
+            'guru'        => $guruMapel ? $guruMapel->guru : null 
         ]);
     }
 

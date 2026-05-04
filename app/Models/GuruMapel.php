@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GuruMapel extends Model
 {
-     use SoftDeletes;
+
 protected $table = 'guru_mapels';
     protected $guarded = ['id'];
 
@@ -18,7 +18,7 @@ protected $table = 'guru_mapels';
 
    public function mapel()
     {
-        return $this->belongsTo(Mapel::class)->withTrashed();
+        return $this->belongsTo(Mapel::class);
     }
 
     public function guru()
@@ -26,8 +26,9 @@ protected $table = 'guru_mapels';
         return $this->belongsTo(Guru::class, 'guru_id');
     }
 
-    public function absensis()
+    public function sesiAbsensis()
     {
-        return $this->hasMany(Absensi::class);
+        return $this->hasMany(SesiAbsensi::class, 'guru_mapel_id');
     }
+
 }

@@ -8,9 +8,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Mapel extends Model
 {
   protected $table = 'mapels';
-    use SoftDeletes;
-
- 
     protected $fillable = [
         'kode_mapel',
         'nama_mapel',

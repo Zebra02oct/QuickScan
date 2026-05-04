@@ -9,12 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Kelas extends Model
 {
-    use SoftDeletes;
 
     protected $fillable = [
         'tingkat',
         'jurusan',
         'nama_kelas',
+        'is_active',
         'guru_id', 
     ];
 
