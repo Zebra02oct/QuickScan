@@ -13,6 +13,7 @@ use App\Livewire\Dashboard\Guru\Index as GuruDashboard;
 use App\Livewire\Dashboard\Siswa\Index as SiswaDashboard;
 use App\Livewire\Guru\BukaSesiAbsen;
 use App\Livewire\Guru\DetailAbsensi;
+use App\Livewire\Guru\LaporanAbsensi\Detail as LaporanAbsensiDetail;
 use App\Livewire\Guru\LaporanAbsensi\Index as LaporanAbsensiGuru;
 use App\Livewire\Guru\LiveMonitorAbsen;
 use App\Livewire\Guru\ManajemenAbsensi;
@@ -54,7 +55,8 @@ Route::get('/live-absen/{token}', LiveMonitorAbsen::class)->name('guru.absen.liv
   Route::get('/manajemen-absensi', ManajemenAbsensi::class)->name('guru.manajemenAbsensi');
   Route::get('/manajemen/absensi/{sesi_id}', DetailAbsensi::class)->name('guru.detailAbsensi');
 
-    Route::get('/laporan-absensi', LaporanAbsensiGuru::class)->name('guru.laporanAbsensi');
+    Route::get('/laporanAbsensi', LaporanAbsensiGuru::class)->name('guru.laporanAbsensi'); 
+      Route::get('/guru/laporanAbsensi/detail/{id}', LaporanAbsensiDetail::class)->name('guru.laporanAbsensi.detail');
 });
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {

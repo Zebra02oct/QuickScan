@@ -53,10 +53,7 @@
                 <p class="text-sm text-slate-500">Semester {{ ucfirst($filter_semester) }} Tahun {{ $filter_tahun }}</p>
             </div>
 
-            <button
-                class="w-full sm:w-auto px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2">
-                <i class="ri-printer-line text-lg"></i> Cetak Bukti Mengajar
-            </button>
+
         </div>
 
 
@@ -124,11 +121,13 @@
                         </ul>
                     </div>
 
+                    <x-ui.button
+                        href="{{ route('guru.laporanAbsensi.detail', ['id' => $kartu->id, 'start' => $this->getRentangTanggal()[0], 'end' => $this->getRentangTanggal()[1]]) }}"
+                        class="w-full sm:w-auto" icon="ri-arrow-right-line" color="primary">
+                        Lihat Detail
+                    </x-ui.button>
 
-                    <a href="#"
-                        class="w-full bg-white text-sky-600 border border-sky-200 py-2.5 rounded-xl font-bold hover:bg-sky-500 hover:text-white hover:border-transparent transition-all flex justify-center items-center gap-2 shadow-sm">
-                        Buka Analitik Kelas <i class="ri-arrow-right-line"></i>
-                    </a>
+
                 </div>
             @empty
                 <div
