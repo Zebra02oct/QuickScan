@@ -95,8 +95,7 @@ class LiveMonitorAbsen extends Component
 public function ubahStatusSiswa($siswaId, $sesiId, $statusBaru)
 {
   
-   $absen = Absensi::withTrashed()
-            ->where('sesi_absensi_id', $sesiId)
+   $absen = Absensi::where('sesi_absensi_id', $sesiId)
             ->where('siswa_id', $siswaId)
             ->first();
 
