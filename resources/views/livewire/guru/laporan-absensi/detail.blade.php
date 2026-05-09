@@ -189,7 +189,7 @@
                             <i class="ri-alarm-warning-fill"></i>
                         </div>
                         <div>
-                            <h3 class="font-extrabold text-rose-600">Daftar Siswa dengan Alpa Tinggi</h3>
+                            <h3 class="font-extrabold text-rose-600">5 Daftar Siswa dengan Alpa Tinggi</h3>
                         </div>
                     </div>
                     <p class="text-xs font-medium text-slate-500 mb-5">Siswa dengan rekor Alpa terbanyak (≥ 3 kali).

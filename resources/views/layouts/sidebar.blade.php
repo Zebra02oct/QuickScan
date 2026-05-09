@@ -151,6 +151,21 @@
                             <span class="text-sm">Manajemen Absensi</span>
                         </a>
                     </li>
+
+                    <li>
+                        <a href="{{ route('admin.laporanAbsensi') }}" wire:navigate
+                            class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
+        {{ request()->routeIs('admin.laporanAbsensi')
+            ? 'bg-sky-50 text-sky-600 font-semibold'
+            : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
+
+                            <i
+                                class="ri-pie-chart-2-{{ request()->routeIs('admin.laporanAbsensi') ? 'fill' : 'line' }} 
+           text-xl group-hover:animate-jiggle"></i>
+
+                            <span class="text-sm">Laporan Absensi</span>
+                        </a>
+                    </li>
             </ul>
         </div>
         @endif

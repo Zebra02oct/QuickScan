@@ -19,7 +19,6 @@ use Livewire\WithPagination;
 
 class Detail extends Component
 {
-
     use WithPagination;
 
     #[Layout('layouts.app')]
@@ -97,7 +96,6 @@ class Detail extends Component
             'sesi'       => $sesi->count()
         ];
     }
-
 
     #[Computed]
     public function siswaKritis()

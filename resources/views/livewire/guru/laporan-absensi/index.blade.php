@@ -40,10 +40,11 @@
 
 
             <x-ui.card title="Rata-Rata Hadir" value="{{ $this->statistikGlobal['rata_hadir'] }}%"
-                icon="ri-line-chart-fill" color="warning" size="xs" subtitle="Segera Hadir" />
+                icon="ri-line-chart-fill" color="warning" size="xs"
+                subtitle="dari {{ $this->statistikGlobal['total_sesi'] }} sesi" />
 
             <x-ui.card title="Total Siswa" value="{{ $this->statistikGlobal['total_siswa'] }}" icon="ri-group-fill"
-                color="danger" size="xs" subtitle="Segera Hadir" />
+                color="danger" size="xs" subtitle="Siswa" />
         </div>
 
 

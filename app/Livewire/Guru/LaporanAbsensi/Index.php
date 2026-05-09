@@ -41,17 +41,19 @@ class Index extends Component
     }
 
  
-    protected function getRentangTanggal()
+   public function getRentangTanggal()
     {
+        $tahun = $this->filter_tahun;
+
         if ($this->filter_semester == 'ganjil') {
             return [
-                $this->filter_tahun . '-07-01', 
-                $this->filter_tahun . '-12-31'
+                \Carbon\Carbon::create($tahun, 7, 1)->startOfDay(),
+                \Carbon\Carbon::create($tahun, 12, 31)->endOfDay()
             ];
         } else {
             return [
-                $this->filter_tahun . '-01-01', 
-                $this->filter_tahun . '-06-30'
+                \Carbon\Carbon::create($tahun, 1, 1)->startOfDay(),
+                \Carbon\Carbon::create($tahun, 6, 30)->endOfDay()
             ];
         }
     }
@@ -82,17 +84,49 @@ class Index extends Component
             ->get();
     }
 
-    #[Computed]
+ #[Computed]
     public function statistikGlobal()
     {
         $kartus = $this->daftarKartu;
         $totalSesi = $kartus->sum('total_pertemuan');
         
+        $guruMapelIds = $kartus->pluck('id')->toArray();
+        [$startDate, $endDate] = $this->getRentangTanggal();
+        
+       
+        $sesiIds = \App\Models\SesiAbsensi::whereIn('guru_mapel_id', $guruMapelIds)
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->pluck('id')->toArray();
+            
+      
+        if (empty($sesiIds)) {
+            return [
+                'total_kelas' => $kartus->count(),
+                'total_sesi'  => $totalSesi,
+                'rata_hadir'  => 0,
+                'total_siswa' => 0 
+            ];
+        }
+
+     
+        $totalSiswa = \App\Models\Absensi::whereIn('sesi_absensi_id', $sesiIds)
+            ->distinct('siswa_id')
+            ->count('siswa_id');
+
+    
+        $totalKehadiran = \App\Models\Absensi::whereIn('sesi_absensi_id', $sesiIds)->count();
+        
+        $totalHadir = \App\Models\Absensi::whereIn('sesi_absensi_id', $sesiIds)
+            ->whereIn('status', ['hadir', 'terlambat'])
+            ->count();
+            
+        $rataHadir = $totalKehadiran > 0 ? round(($totalHadir / $totalKehadiran) * 100) : 0;
+
         return [
             'total_kelas' => $kartus->count(),
             'total_sesi'  => $totalSesi,
-            'rata_hadir'  => 0, 
-            'total_siswa' => 0 
+            'rata_hadir'  => $rataHadir,
+            'total_siswa' => $totalSiswa
         ];
     }
 

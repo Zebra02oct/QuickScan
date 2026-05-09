@@ -15,6 +15,8 @@ use App\Livewire\Guru\BukaSesiAbsen;
 use App\Livewire\Guru\DetailAbsensi;
 use App\Livewire\Guru\LaporanAbsensi\Detail as LaporanAbsensiDetail;
 use App\Livewire\Guru\LaporanAbsensi\Index as LaporanAbsensiGuru;
+use App\Livewire\Admin\LaporanAbsensi\Detail as LaporanAbsensiDetailAdmin;
+use App\Livewire\Admin\LaporanAbsensi\Index as LaporanAbsensiAdmin;
 use App\Livewire\Guru\LiveMonitorAbsen;
 use App\Livewire\Guru\ManajemenAbsensi;
 use App\Livewire\Siswa\RiwayatKehadiran;
@@ -46,6 +48,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/manajemen-guru-mapel', GuruMapel::class)->name('admin.guruMapel.index');
       Route::get('/manajemen-absensi', ManajemenAbsensiForAdmin::class)->name('admin.manajemenAbsensi.index');
             Route::get('/manajemenAbsensi/{sesi_id}', Detail::class)->name('admin.manajemenAbsensi.detail');
+
+             Route::get('/laporanAbsensi', LaporanAbsensiAdmin::class)->name('admin.laporanAbsensi'); 
+             Route::get('/laporan-absensi/{kelas_id}', LaporanAbsensiDetailAdmin::class)->name('admin.laporanAbsensi.detail');
 });
 
 Route::middleware(['auth' ,'role:guru'])->prefix('guru')->group(function () {
