@@ -246,6 +246,21 @@
                 </a>
             </li>
         @endif
+        <li>
+            <a href="{{ route('profile') }}" wire:navigate
+                class="group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 
+        {{ request()->routeIs('profile')
+            ? 'bg-sky-50 text-sky-600 font-semibold'
+            : 'text-gray-500 hover:bg-sky-50/60 hover:text-sky-600 hover:translate-x-1' }}">
+
+                <i
+                    class="ri-id-card-{{ request()->routeIs('profile') ? 'fill' : 'line' }} 
+           text-xl group-hover:animate-jiggle"></i>
+
+                <span class="text-sm">Profile</span>
+            </a>
+        </li>
+
 
         <div class="p-4 border-t border-sky-100">
             <form id="logout-form-sidebar" method="POST" action="{{ route('logout') }}" class="hidden">

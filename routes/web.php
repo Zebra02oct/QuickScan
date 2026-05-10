@@ -19,6 +19,7 @@ use App\Livewire\Admin\LaporanAbsensi\Detail as LaporanAbsensiDetailAdmin;
 use App\Livewire\Admin\LaporanAbsensi\Index as LaporanAbsensiAdmin;
 use App\Livewire\Guru\LiveMonitorAbsen;
 use App\Livewire\Guru\ManajemenAbsensi;
+use App\Livewire\Profile\Index as ProfileIndex;
 use App\Livewire\Siswa\RiwayatKehadiran;
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +69,12 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
      Route::get('/dashboard', SiswaDashboard::class)->name('siswa.dashboard');
      Route::get('/riwayat-kehadiran', RiwayatKehadiran::class)->name('siswa.riwayatKehadiran');
     Route::get('/scan-absen', \App\Livewire\Siswa\ScanAbsen::class)->name('siswa.absen.scan');
+
+});
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/profile', ProfileIndex::class)->name('profile');
 
 });
 
