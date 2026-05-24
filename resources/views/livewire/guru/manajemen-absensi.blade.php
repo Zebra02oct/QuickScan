@@ -146,14 +146,24 @@
                                 </td>
 
                                 <td class="px-3 sm:px-4 py-2 sm:py-3 text-left">
-                                    <div class="text-xs sm:text-sm font-bold text-slate-700">
-                                        {{ Str::title($row->guruMapel->mapel->nama_mapel ?? '-') }}
-                                        ({{ $row->guruMapel->mapel->kode_mapel ?? '-' }})
-                                    </div>
-                                    <div class="text-[11px] sm:text-xs text-indigo-600 font-semibold mt-0.5">
-                                        <i class="ri-building-4-line align-middle"></i>
-                                        {{ $row->guruMapel->kelas->nama_kelas ?? '-' }}
-                                    </div>
+                                    @if ($row->is_kelas_only)
+                                        <div class="text-xs sm:text-sm font-bold text-slate-700">
+                                            {{ Str::title($row->kelas->nama_kelas ?? '-') }}
+                                        </div>
+                                        <div class="text-[11px] sm:text-xs text-amber-600 font-semibold mt-0.5">
+                                            <i class="ri-user-settings-line align-middle"></i>
+                                            Absensi Kelas (Wali Kelas)
+                                        </div>
+                                    @else
+                                        <div class="text-xs sm:text-sm font-bold text-slate-700">
+                                            {{ Str::title($row->guruMapel->mapel->nama_mapel ?? '-') }}
+                                            ({{ $row->guruMapel->mapel->kode_mapel ?? '-' }})
+                                        </div>
+                                        <div class="text-[11px] sm:text-xs text-indigo-600 font-semibold mt-0.5">
+                                            <i class="ri-building-4-line align-middle"></i>
+                                            {{ $row->guruMapel->kelas->nama_kelas ?? '-' }}
+                                        </div>
+                                    @endif
                                 </td>
 
                                 <td class="px-3 sm:px-4 py-2 sm:py-3 text-center whitespace-nowrap">
@@ -193,13 +203,23 @@
                                             <i class="ri-eye-line"></i> Detail
                                         </a>
 
+                                        @if ($row->status === 'berjalan' && $row->token_qr)
+                                            <a href="{{ route('guru.absen.live', ['token' => $row->token_qr]) }}"
+                                                wire:navigate
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-sm border border-emerald-100 hover:border-transparent"
+                                                title="Buka Halaman Monitoring Sesi">
+                                                <i class="ri-broadcast-line"></i> Monitor
+                                            </a>
+                                        @endif
+
                                         @php
                                             $isLocked = \Carbon\Carbon::parse($row->created_at)->addDays(7)->isPast();
+                                            $namaMapelOrKelas = $row->is_kelas_only ? ($row->kelas->nama_kelas ?? 'Kelas') : ($row->guruMapel->mapel->nama_mapel ?? 'Mapel');
                                         @endphp
 
                                         @if (!$isLocked)
                                             <button
-                                                onclick="konfirmasiHapusSesi({{ $row->id }} , @js($row->guruMapel->mapel->nama_mapel), @js(\Carbon\Carbon::parse($row->tanggal)->translatedFormat('l, d M Y')))"
+                                                onclick="konfirmasiHapusSesi({{ $row->id }} , @js($namaMapelOrKelas), @js(\Carbon\Carbon::parse($row->tanggal)->translatedFormat('l, d M Y')))"
                                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all shadow-sm border border-rose-100 hover:border-transparent"
                                                 title="Hapus Sesi">
                                                 <i class="ri-delete-bin-line"></i> Hapus

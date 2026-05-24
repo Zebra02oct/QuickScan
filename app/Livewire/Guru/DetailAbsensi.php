@@ -4,6 +4,7 @@ namespace App\Livewire\Guru;
 
 use App\Models\Absensi;
 use App\Models\SesiAbsensi;
+use Carbon\Carbon;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -14,27 +15,33 @@ class DetailAbsensi extends Component
 
  #[Layout('layouts.app')]
 #[Title('Detail Absensi')]
-    
+
     public $sesi_id;
     public $sesi;
 
-  
+
     public function mount($sesi_id)
     {
         $this->sesi_id = $sesi_id;
-        $this->sesi = SesiAbsensi::with(['guruMapel.kelas', 'guruMapel.mapel'])->findOrFail($sesi_id);
+
+        // Load sesi dengan relasi yang sesuai, tangani kelas_only
+        $this->sesi = SesiAbsensi::with([
+            'guruMapel.mapel',
+            'guruMapel.kelas',
+            'kelas.waliKelas'
+        ])->findOrFail($sesi_id);
     }
 
     #[Computed]
     public function isLocked()
     {
-        return \Carbon\Carbon::parse($this->sesi->created_at)->addDays(7)->isPast();
+        return Carbon::parse($this->sesi->created_at)->addDays(7)->isPast();
     }
 
     #[Computed]
     public function daftarAbsen()
     {
-        return Absensi::with('siswa.user')
+        return Absensi::with(['siswa.user', 'sesiAbsensi.guruMapel.mapel', 'sesiAbsensi.guruMapel.kelas'])
             ->where('sesi_absensi_id', $this->sesi_id)
             ->get();
     }
@@ -65,7 +72,7 @@ class DetailAbsensi extends Component
         $absen = Absensi::find($idAbsensi);
         if ($absen) {
             $absen->update(['status' => $statusBaru]);
-            
+
              $this->dispatch('swal:success', [
                 'title' => 'Berhasil!',
                 'text' => 'Status Berhasil Diubah.'

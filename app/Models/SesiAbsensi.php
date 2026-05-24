@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SesiAbsensi extends Model
 {
@@ -12,20 +12,28 @@ class SesiAbsensi extends Model
 
     protected $table = 'sesi_absensis';
 
-
     protected $guarded = ['id'];
-    
+
     protected $casts = [
         'tanggal' => 'date',
+        'is_kelas_only' => 'boolean',
     ];
 
-   
-    public function guruMapel()
+    public function guruMapel(): BelongsTo
     {
         return $this->belongsTo(GuruMapel::class);
     }
 
- 
+    public function kelas(): BelongsTo
+    {
+        return $this->belongsTo(Kelas::class);
+    }
+
+    public function waliKelas(): BelongsTo
+    {
+        return $this->belongsTo(Guru::class, 'wali_kelas_id');
+    }
+
     public function absensis()
     {
         return $this->hasMany(Absensi::class, 'sesi_absensi_id');
@@ -37,21 +45,29 @@ class SesiAbsensi extends Model
             ->where('created_at', '<=', now()->subHours(3))
             ->get();
 
-
         foreach ($sesiLama as $sesi) {
-        
-            $siswaSudahAbsen = \App\Models\Absensi::where('sesi_absensi_id', $sesi->id)
+            $siswaSudahAbsen = Absensi::where('sesi_absensi_id', $sesi->id)
                 ->pluck('siswa_id')
                 ->toArray();
 
-            $semuaSiswaKelas = $sesi->guruMapel->kelas->siswas->pluck('id')->toArray();
+            // Ambil siswa berdasarkan tipe sesi
+            if ($sesi->is_kelas_only && $sesi->kelas_id) {
+                // Untuk sesi kelas saja, ambil dari kelas_id langsung
+                $kelas = $sesi->kelas;
+                $semuaSiswaKelas = $kelas ? $kelas->siswas->pluck('id')->toArray() : [];
+            } elseif ($sesi->guru_mapel_id && $sesi->guruMapel) {
+                // Untuk sesi reguler (dengan mapel)
+                $semuaSiswaKelas = $sesi->guruMapel->kelas->siswas->pluck('id')->toArray();
+            } else {
+                $semuaSiswaKelas = [];
+            }
 
             $siswaAlpa = array_diff($semuaSiswaKelas, $siswaSudahAbsen);
 
             $sesi->update([
                 'status' => 'selesai',
                 'waktu_selesai' => $sesi->created_at->addHours(3)->toTimeString(),
-                'token_qr' => null
+                'token_qr' => null,
             ]);
 
             $dataInsert = [];
@@ -66,7 +82,7 @@ class SesiAbsensi extends Model
             }
 
             if (!empty($dataInsert)) {
-                \App\Models\Absensi::insert($dataInsert);
+                Absensi::insert($dataInsert);
             }
         }
     }

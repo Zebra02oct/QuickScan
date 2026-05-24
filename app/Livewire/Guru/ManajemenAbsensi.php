@@ -79,8 +79,23 @@ public function updating($property)
     #[Computed]
     public function daftarSesi()
     {
-        $query = SesiAbsensi::with(['guruMapel.mapel', 'guruMapel.kelas'])
-            ->whereIn('guru_mapel_id', $this->myGuruMapelIds)
+        $guruId = $this->guruId;
+
+        // Ambil guru_mapel_ids untuk sesi reguler
+        $guruMapelIds = GuruMapel::where('guru_id', $guruId)->pluck('id');
+
+        $query = SesiAbsensi::with(['guruMapel.mapel', 'guruMapel.kelas', 'kelas'])
+            ->where(function ($q) use ($guruId, $guruMapelIds) {
+                // Sesi reguler (dengan guru_mapel_id)
+                $q->whereIn('guru_mapel_id', $guruMapelIds)
+                    ->where('is_kelas_only', false);
+
+                // Sesi kelas saja (wali kelas)
+                $q->orWhere(function ($q2) use ($guruId) {
+                    $q2->where('is_kelas_only', true)
+                        ->where('wali_kelas_id', $guruId);
+                });
+            })
             ->withCount([
                 'absensis as hadir_count' => function ($q) {
                     $q->whereIn('status', ['hadir', 'terlambat']);
@@ -94,8 +109,13 @@ public function updating($property)
             ]);
 
         if ($this->filter_kelas_id) {
-            $query->whereHas('guruMapel', function ($q) {
-                $q->where('kelas_id', $this->filter_kelas_id);
+            $query->where(function ($q) {
+                $q->whereHas('guruMapel', function ($q2) {
+                    $q2->where('kelas_id', $this->filter_kelas_id);
+                })->orWhere(function ($q3) {
+                    $q3->where('is_kelas_only', true)
+                        ->where('kelas_id', $this->filter_kelas_id);
+                });
             });
         }
 
@@ -113,10 +133,18 @@ public function updating($property)
         }
 
         if ($this->search) {
-            $query->whereHas('guruMapel.kelas', function ($q) {
-                $q->where('nama_kelas', 'like', '%' . $this->search . '%');
-            })->orWhereHas('guruMapel.mapel', function ($q) {
-                $q->where('nama_mapel', 'like', '%' . $this->search . '%');
+            $search = $this->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('guruMapel.kelas', function ($q2) use ($search) {
+                    $q2->where('nama_kelas', 'like', '%' . $search . '%');
+                })->orWhereHas('guruMapel.mapel', function ($q3) use ($search) {
+                    $q3->where('nama_mapel', 'like', '%' . $search . '%');
+                })->orWhere(function ($q4) use ($search) {
+                    $q4->where('is_kelas_only', true)
+                        ->whereHas('kelas', function ($q5) use ($search) {
+                            $q5->where('nama_kelas', 'like', '%' . $search . '%');
+                        });
+                });
             });
         }
 

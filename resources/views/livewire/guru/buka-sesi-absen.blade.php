@@ -18,92 +18,169 @@
 
             <div class="p-5 sm:p-8 space-y-6 sm:space-y-8">
 
-                <div>
-                    <label class="block text-sm sm:text-base font-bold text-gray-700 mb-2">
-                        Mata Pelajaran <span class="text-rose-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <select wire:model.live="mapel_id"
-                            class="w-full pl-4 pr-10 py-3 sm:py-4 text-sm sm:text-base border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 outline-none bg-slate-50 transition-all cursor-pointer appearance-none shadow-sm">
-                            <option value="">Pilih Mata Pelajaran</option>
-                            @foreach ($this->listMapel as $gm)
-                                <option value="{{ $gm->mapel_id }}">{{ $gm->mapel->kode_mapel }} -
-                                    {{ ucwords($gm->mapel->nama_mapel) }}</option>
-                            @endforeach
-                        </select>
+                {{-- SECTION: BUKA SESI KELAS (UNTUK WALI KELAS) --}}
+                @if ($this->isWaliKelas)
+                    @php
+                        $kelasWali = $this->kelasWali;
+                        $sudahAdaSesi = $this->sudahAdaSesiKelas;
+                        $sesiKelas = $this->sesiKelasHariIni;
+                    @endphp
 
-                    </div>
-                    @error('mapel_id')
-                        <span class="text-rose-500 text-sm font-medium mt-1.5 block">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                @if ($mapel_id)
-                    <div class="animate-fade-in-down">
-                        <label class="block text-sm sm:text-base font-bold text-gray-700 mb-3">
-                            Pilih Kelas yang Diajar (Bisa digabung) <span class="text-rose-500">*</span>
-                        </label>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                            @forelse ($this->listKelas as $gm)
-                                <label
-                                    class="flex items-start p-4 sm:p-5 border-2 rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-200 
-                                    {{ in_array($gm->id, $kelas_terpilih) ? 'border-sky-500 bg-sky-50/50 shadow-md transform scale-[1.01]' : 'border-gray-100 bg-white hover:border-gray-300 hover:bg-slate-50 shadow-sm' }}">
-
-                                    <input type="checkbox" wire:model="kelas_terpilih" value="{{ $gm->id }}"
-                                        class="w-5 h-5 sm:w-6 sm:h-6 text-sky-600 rounded-md border-gray-300 focus:ring-sky-500 mt-0.5 sm:mt-0 transition-colors">
-
-                                    <div class="ml-3 sm:ml-4 flex flex-col w-full">
-                                        <span
-                                            class="font-bold text-base sm:text-lg leading-tight {{ in_array($gm->id, $kelas_terpilih) ? 'text-sky-900' : 'text-gray-800' }}">
-                                            {{ $gm->kelas->nama_kelas }}
+                    <div class="mb-8">
+                        <div
+                            class="flex items-center gap-3 mb-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                                <i class="ri-user-settings-line text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-amber-800">Sesi Absensi Kelas (Wali Kelas)</h3>
+                                <p class="text-sm text-amber-600">
+                                    @if ($kelasWali)
+                                        {{ $kelasWali->nama_kelas }}
+                                    @endif
+                                    @if ($sudahAdaSesi)
+                                        <span class="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">
+                                            SUDAH DIBUKA
                                         </span>
-                                        <span
-                                            class="text-xs sm:text-sm font-semibold mt-1 sm:mt-1.5 {{ in_array($gm->id, $kelas_terpilih) ? 'text-sky-600' : 'text-slate-400' }} flex items-center gap-1.5">
-                                            <i class="ri-group-line text-sm sm:text-base"></i>
-                                            {{ $gm->kelas->siswas_count ?? 0 }} Siswa Terdaftar
+                                    @else
+                                        <span class="ml-2 px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-full">
+                                            BELUM DIBUKA
                                         </span>
-                                    </div>
-                                </label>
-                            @empty
-                                <div
-                                    class="col-span-full p-5 bg-amber-50 text-amber-700 rounded-2xl border border-amber-200 flex items-start gap-3 shadow-sm">
-                                    <i class="ri-error-warning-fill text-2xl mt-0.5"></i>
-                                    <div>
-                                        <h4 class="font-bold text-amber-800">Tidak ada kelas yang ditugaskan</h4>
-                                        <p class="text-sm mt-1">Anda belum memiliki jadwal mengajar untuk mata pelajaran
-                                            ini. Silakan hubungi Admin.</p>
-                                    </div>
-                                </div>
-                            @endforelse
+                                    @endif
+                                </p>
+                            </div>
                         </div>
-                        @error('kelas_terpilih')
+
+                        @if ($sudahAdaSesi)
+                            {{-- TOMBOL MENUJU HALAMAN ABSENSI LIVE --}}
+                            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <i class="ri-checkbox-circle-fill text-emerald-600 text-xl"></i>
+                                    <span class="font-bold text-emerald-700">Sesi absensi kelas sudah dibuka</span>
+                                </div>
+                                <p class="text-sm text-emerald-600 mb-4">
+                                    Siswa dapat melakukan scan QR Code untuk sesi ini.
+                                </p>
+                                <a href="{{ route('guru.absen.live', ['token' => $sesiKelas->token_qr]) }}"
+                                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-md">
+                                    <i class="ri-qr-scan-line"></i>
+                                    Lihat Halaman Absensi
+                                    <i class="ri-arrow-right-line"></i>
+                                </a>
+                            </div>
+                        @else
+                            {{-- TOMBOL BUKA SESI KELAS --}}
+                            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                                <h4 class="font-bold text-slate-700 mb-2 flex items-center gap-2">
+                                    <i class="ri-list-check text-slate-500"></i>
+                                    {{ $kelasWali->nama_kelas ?? '' }}
+                                </h4>
+                                <p class="text-sm text-slate-500 mb-4">
+                                    <i class="ri-group-line mr-1"></i>
+                                    {{ $kelasWali->siswas->count() ?? 0 }} siswa terdaftar
+                                </p>
+                                <x-ui.button wire:click="bukaSesiKelas" color="warning" icon="ri-qr-scan-line" class="w-full sm:w-auto">
+                                    Buka Sesi Absensi Kelas
+                                </x-ui.button>
+                            </div>
+                        @endif
+                    </div>
+
+                    <hr class="border-slate-200 my-6">
+                @endif
+
+                {{-- SECTION: BUKA SESI ABSENSI REGULER (MAPEL) --}}
+                <div>
+                    <h3 class="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
+                        <i class="ri-book-2-line text-sky-600"></i>
+                        Buka Sesi Absensi Mata Pelajaran
+                    </h3>
+
+                    <div>
+                        <label class="block text-sm sm:text-base font-bold text-gray-700 mb-2">
+                            Mata Pelajaran <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <select wire:model.live="mapel_id"
+                                class="w-full pl-4 pr-10 py-3 sm:py-4 text-sm sm:text-base border border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-sky-500/20 focus:border-sky-500 outline-none bg-slate-50 transition-all cursor-pointer appearance-none shadow-sm">
+                                <option value="">Pilih Mata Pelajaran</option>
+                                @foreach ($this->listMapel as $gm)
+                                    <option value="{{ $gm->mapel_id }}">{{ $gm->mapel->kode_mapel }} -
+                                        {{ ucwords($gm->mapel->nama_mapel) }}</option>
+                                @endforeach
+                            </select>
+
+                        </div>
+                        @error('mapel_id')
                             <span class="text-rose-500 text-sm font-medium mt-1.5 block">{{ $message }}</span>
                         @enderror
                     </div>
-                @else
-                    <div
-                        class="p-8 sm:p-12 border-2 border-dashed border-gray-200 rounded-2xl sm:rounded-3xl bg-slate-50 text-center text-slate-400 flex flex-col items-center justify-center transition-all">
-                        <div class="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4">
-                            <i class="ri-checkbox-multiple-line text-3xl text-gray-400"></i>
-                        </div>
-                        <h3 class="text-base sm:text-lg font-bold text-gray-600">Pilih Mata Pelajaran</h3>
-                        <p class="text-sm sm:text-base font-medium mt-1">Daftar kelas akan muncul setelah mapel dipilih.
-                        </p>
-                    </div>
-                @endif
 
+                    @if ($mapel_id)
+                        <div class="animate-fade-in-down mt-6">
+                            <label class="block text-sm sm:text-base font-bold text-gray-700 mb-3">
+                                Pilih Kelas yang Diajar (Bisa digabung) <span class="text-rose-500">*</span>
+                            </label>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                                @forelse ($this->listKelas as $gm)
+                                    <label
+                                        class="flex items-start p-4 sm:p-5 border-2 rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-200
+                                        {{ in_array($gm->id, $kelas_terpilih) ? 'border-sky-500 bg-sky-50/50 shadow-md transform scale-[1.01]' : 'border-gray-100 bg-white hover:border-gray-300 hover:bg-slate-50 shadow-sm' }}">
+
+                                        <input type="checkbox" wire:model="kelas_terpilih" value="{{ $gm->id }}"
+                                            class="w-5 h-5 sm:w-6 sm:h-6 text-sky-600 rounded-md border-gray-300 focus:ring-sky-500 mt-0.5 sm:mt-0 transition-colors">
+
+                                        <div class="ml-3 sm:ml-4 flex flex-col w-full">
+                                            <span
+                                                class="font-bold text-base sm:text-lg leading-tight {{ in_array($gm->id, $kelas_terpilih) ? 'text-sky-900' : 'text-gray-800' }}">
+                                                {{ $gm->kelas->nama_kelas }}
+                                            </span>
+                                            <span
+                                                class="text-xs sm:text-sm font-semibold mt-1 sm:mt-1.5 {{ in_array($gm->id, $kelas_terpilih) ? 'text-sky-600' : 'text-slate-400' }} flex items-center gap-1.5">
+                                                <i class="ri-group-line text-sm sm:text-base"></i>
+                                                {{ $gm->kelas->siswas_count ?? 0 }} Siswa Terdaftar
+                                            </span>
+                                        </div>
+                                    </label>
+                                @empty
+                                    <div
+                                        class="col-span-full p-5 bg-amber-50 text-amber-700 rounded-2xl border border-amber-200 flex items-start gap-3 shadow-sm">
+                                        <i class="ri-error-warning-fill text-2xl mt-0.5"></i>
+                                        <div>
+                                            <h4 class="font-bold text-amber-800">Tidak ada kelas yang ditugaskan</h4>
+                                            <p class="text-sm mt-1">Anda belum memiliki jadwal mengajar untuk mata pelajaran
+                                                ini. Silakan hubungi Admin.</p>
+                                        </div>
+                                    </div>
+                                @endforelse
+                            </div>
+                            @error('kelas_terpilih')
+                                <span class="text-rose-500 text-sm font-medium mt-1.5 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    @else
+                        <div
+                            class="p-8 sm:p-12 border-2 border-dashed border-gray-200 rounded-2xl sm:rounded-3xl bg-slate-50 text-center text-slate-400 flex flex-col items-center justify-center transition-all mt-6">
+                            <div class="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4">
+                                <i class="ri-checkbox-multiple-line text-3xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-base sm:text-lg font-bold text-gray-600">Pilih Mata Pelajaran</h3>
+                            <p class="text-sm sm:text-base font-medium mt-1">Daftar kelas akan muncul setelah mapel dipilih.
+                            </p>
+                        </div>
+                    @endif
+                </div>
 
             </div>
 
             <div
                 class="p-5 sm:p-6 bg-slate-50 border-t border-gray-100 flex flex-col sm:flex-row justify-end items-center gap-3">
 
-
                 <x-ui.button onclick="history.back()" size="lg" class="w-full sm:w-auto" color="white">
                     Batal
                 </x-ui.button>
-                <x-ui.button loadingText="Memulai Sesi" wire:click="mulaiSesi" color="primary" icon="ri-rocket-2-fill"
+                <x-ui.button wire:click="mulaiSesi" color="primary" icon="ri-rocket-2-fill"
                     class="w-full sm:w-auto">
                     Mulai Live Absen
                 </x-ui.button>
@@ -116,36 +193,27 @@
         <script>
             document.addEventListener('livewire:initialized', () => {
 
-
                 Livewire.on('swal:success', (data) => {
-
                     let info = data[0];
-
                     Swal.fire({
                         title: info.title,
                         text: info.text,
                         icon: 'success',
                         confirmButtonColor: '#22c55e',
                         confirmButtonText: 'OK',
-                        customClass: {
-                            popup: 'rounded-2xl'
-                        }
+                        customClass: { popup: 'rounded-2xl' }
                     });
                 });
 
-
                 Livewire.on('swal:error', (data) => {
                     let info = data[0];
-
                     Swal.fire({
                         title: info.title,
                         text: info.text,
                         icon: 'error',
                         confirmButtonColor: '#ef4444',
                         confirmButtonText: 'Mengerti',
-                        customClass: {
-                            popup: 'rounded-2xl'
-                        }
+                        customClass: { popup: 'rounded-2xl' }
                     });
                 });
 

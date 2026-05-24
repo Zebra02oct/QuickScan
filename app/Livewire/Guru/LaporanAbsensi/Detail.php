@@ -4,7 +4,7 @@ namespace App\Livewire\Guru\LaporanAbsensi;
 
 use App\Models\GuruMapel;
 use App\Models\SesiAbsensi;
-use App\Models\Absensi; 
+use App\Models\Absensi;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\Guru\RekapAbsensiExport;
@@ -26,7 +26,7 @@ class Detail extends Component
 
     public $guru_mapel_id;
     public $guruMapel;
-    
+
     public $start_date;
     public $end_date;
 
@@ -34,9 +34,9 @@ class Detail extends Component
     {
 
         $this->guru_mapel_id = $id;
-        
+
         $this->guruMapel = GuruMapel::with(['kelas', 'mapel'])->findOrFail($id);
-        
+
         if ($this->guruMapel->guru_id !== Auth::user()->guru->id) {
             abort(403, 'Anda tidak memiliki akses ke laporan kelas ini.');
         }
@@ -65,10 +65,10 @@ class Detail extends Component
     public function statistik()
     {
         $sesi = $this->dataSesi;
-        $totalHadir = 0; 
-        $totalIzin = 0; 
-        $totalSakit = 0; 
-        $totalAlpa = 0; 
+        $totalHadir = 0;
+        $totalIzin = 0;
+        $totalSakit = 0;
+        $totalAlpa = 0;
         $totalKehadiran = 0;
 
         foreach ($sesi as $s) {
@@ -101,20 +101,20 @@ class Detail extends Component
     public function siswaKritis()
     {
         $sesiIds = $this->dataSesi->pluck('id');
-        
+
         if ($sesiIds->isEmpty()) {
-            return collect(); 
+            return collect();
         }
 
-   
-        return Absensi::with('siswa')
+
+        return Absensi::with('siswa.user')
             ->whereIn('sesi_absensi_id', $sesiIds)
             ->where('status', 'alpa')
             ->select('siswa_id', DB::raw('count(*) as total_alpa'))
             ->groupBy('siswa_id')
-            ->having('total_alpa', '>=', 3) 
+            ->having('total_alpa', '>=', 3)
             ->orderBy('total_alpa', 'desc')
-            ->take(5) 
+            ->take(5)
             ->get();
     }
 
@@ -124,19 +124,19 @@ class Detail extends Component
         return SesiAbsensi::with('absensis')
             ->where('guru_mapel_id', $this->guru_mapel_id)
             ->whereBetween('tanggal', [$this->start_date, $this->end_date])
-            ->orderBy('tanggal', 'desc') 
+            ->orderBy('tanggal', 'desc')
             ->paginate(6);
     }
 
-public function filterData()
+    public function filterData()
     {
         $this->validate([
             'start_date' => 'required|date',
             'end_date'   => 'required|date|after_or_equal:start_date',
         ]);
-        
+
         $this->resetPage();
-        
+
         $this->dispatch('update-chart', rata_hadir: $this->statistik['rata_hadir']);
     }
 
@@ -145,15 +145,15 @@ public function filterData()
 
         $kelas_id = $this->guruMapel->kelas_id;
         $mapel_id = $this->guruMapel->mapel_id;
-        
-      
+
+
         $namaMapel = Str::slug($this->guruMapel->mapel->nama_mapel);
         $namaKelas = Str::slug($this->guruMapel->kelas->nama_kelas);
         $namaFile = "Rekap_{$namaMapel}_{$namaKelas}.xlsx";
 
-   
+
         return Excel::download(
-            new RekapAbsensiExport($kelas_id, $mapel_id, 'custom', $this->start_date, $this->end_date), 
+            new RekapAbsensiExport($kelas_id, $mapel_id, 'custom', $this->start_date, $this->end_date),
             $namaFile
         );
     }
