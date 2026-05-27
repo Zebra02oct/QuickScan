@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
-use App\Models\Kelas;
 use App\Models\SesiAbsensi;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -14,7 +14,12 @@ class AttendanceController extends Controller
     public function scan(Request $request): JsonResponse
     {
         $payload = $request->validate([
-            'qr_token' => ['required', 'string', 'max:100'],
+            'qr_token' => [
+                'required',
+                'string',
+                'size:10',
+                'regex:/^[a-zA-Z0-9]{10}$/'
+            ],
         ]);
 
         SesiAbsensi::tutupSesiOtomatis();
@@ -28,10 +33,12 @@ class AttendanceController extends Controller
         }
 
         $siswa = $user->siswa;
-
-        // Cari sesi berdasarkan token
-        $sesiAktif = SesiAbsensi::where('token_qr', $payload['qr_token'])
+        $sesiAktif = SesiAbsensi::with(['guruMapel.mapel', 'guruMapel.kelas', 'guruMapel.guru.user'])
+            ->where('token_qr', $payload['qr_token'])
             ->where('status', 'berjalan')
+            ->whereHas('guruMapel', function ($query) use ($siswa) {
+                $query->where('kelas_id', $siswa->kelas_id);
+            })
             ->first();
 
         if (!$sesiAktif) {
@@ -39,56 +46,21 @@ class AttendanceController extends Controller
                 'message' => 'QR Code tidak valid atau sesi sudah ditutup oleh guru.',
             ], 400);
         }
+        $sesiStartTime = Carbon::parse($sesiAktif->created_at);
+        $sesiEndTime = $sesiStartTime->copy()->addHours(3);
+        $currentTime = now();
 
-        // Cek apakah sesi kelas saja (tanpa mapel)
-        if ($sesiAktif->is_kelas_only) {
-            $sesiAktif->load(['kelas.waliKelas.user']);
-
-            // Untuk sesi kelas saja, cek apakah siswa ada di kelas yang sesuai
-            $kelasSesii = $sesiAktif->kelas;
-
-            if (!$kelasSesii || (int) $kelasSesii->id !== (int) $siswa->kelas_id) {
-                return response()->json([
-                    'message' => 'Sesi absen ini bukan untuk kelas Anda.',
-                ], 403);
-            }
-
-            $sudahAbsen = Absensi::query()->where('sesi_absensi_id', $sesiAktif->id)
-                ->where('siswa_id', $siswa->id)
-                ->exists();
-
-            if ($sudahAbsen) {
-                return response()->json([
-                    'message' => 'Anda sudah absen pada sesi ini.',
-                ], 409);
-            }
-
-            $absensi = Absensi::create([
-                'sesi_absensi_id' => $sesiAktif->id,
-                'siswa_id' => $siswa->id,
-                'waktu_scan' => now()->toTimeString(),
-                'status' => 'hadir',
-            ]);
-
+        if ($currentTime < $sesiStartTime) {
             return response()->json([
-                'message' => 'Berhasil! Kehadiran tercatat.',
-                'data' => [
-                    'absensi_id' => $absensi->id,
-                    'sesi_absensi_id' => $sesiAktif->id,
-                    'status' => $absensi->status,
-                    'attendance_status' => ucfirst($absensi->status),
-                    'waktu_scan' => $absensi->waktu_scan,
-                    'tanggal' => optional($sesiAktif->tanggal)->toDateString(),
-                    'mapel' => 'Absensi Kelas',
-                    'kelas' => $kelasSesii->nama_kelas,
-                    'guru' => $sesiAktif->kelas?->waliKelas?->user?->name ?? '-',
-                ],
-            ], 201);
+                'message' => 'Sesi absensi belum dimulai.',
+            ], 400);
         }
 
-        // Sesi reguler (dengan mapel)
-        $sesiAktif->load(['guruMapel.mapel', 'guruMapel.kelas', 'guruMapel.guru.user']);
-
+        if ($currentTime > $sesiEndTime) {
+            return response()->json([
+                'message' => 'Sesi absensi sudah ditutup (melewati 3 jam).',
+            ], 400);
+        }
         if ((int) $sesiAktif->guruMapel->kelas_id !== (int) $siswa->kelas_id) {
             return response()->json([
                 'message' => 'Sesi absen ini bukan untuk kelas Anda.',
@@ -108,7 +80,7 @@ class AttendanceController extends Controller
         $absensi = Absensi::create([
             'sesi_absensi_id' => $sesiAktif->id,
             'siswa_id' => $siswa->id,
-            'waktu_scan' => now()->toTimeString(),
+            'waktu_scan' => $currentTime->toTimeString(),
             'status' => 'hadir',
         ]);
 
@@ -145,7 +117,6 @@ class AttendanceController extends Controller
             'sesiAbsensi.guruMapel.mapel',
             'sesiAbsensi.guruMapel.kelas',
             'sesiAbsensi.guruMapel.guru.user',
-            'sesiAbsensi.kelas.waliKelas.user',
         ])->where('siswa_id', $user->siswa->id)->latest();
 
         $paginated = $query->paginate($perPage);
@@ -155,27 +126,15 @@ class AttendanceController extends Controller
 
         return response()->json([
             'data' => collect($paginated->items())->map(function ($absen) {
-                $mapel = $absen->sesiAbsensi?->is_kelas_only
-                    ? 'Absensi Kelas'
-                    : $absen->sesiAbsensi?->guruMapel?->mapel?->nama_mapel;
-
-                $kelas = $absen->sesiAbsensi?->is_kelas_only
-                    ? $absen->sesiAbsensi?->kelas?->nama_kelas
-                    : $absen->sesiAbsensi?->guruMapel?->kelas?->nama_kelas;
-
-                $guru = $absen->sesiAbsensi?->is_kelas_only
-                    ? ($absen->sesiAbsensi?->kelas?->waliKelas?->user?->name ?? '-')
-                    : $absen->sesiAbsensi?->guruMapel?->guru?->user?->name;
-
                 return [
                     'id' => $absen->id,
                     'status' => $absen->status,
                     'waktu_scan' => $absen->waktu_scan,
                     'keterangan' => $absen->keterangan,
                     'tanggal' => optional($absen->sesiAbsensi?->tanggal)->toDateString(),
-                    'mapel' => $mapel,
-                    'kelas' => $kelas,
-                    'guru' => $guru,
+                    'mapel' => $absen->sesiAbsensi?->guruMapel?->mapel?->nama_mapel,
+                    'kelas' => $absen->sesiAbsensi?->guruMapel?->kelas?->nama_kelas,
+                    'guru' => $absen->sesiAbsensi?->guruMapel?->guru?->user?->name,
                 ];
             })->values(),
             'meta' => [
@@ -192,7 +151,6 @@ class AttendanceController extends Controller
             ],
         ]);
     }
-
     public function score(Request $request): JsonResponse
     {
         $user = $request->user()->loadMissing('siswa');
@@ -202,34 +160,75 @@ class AttendanceController extends Controller
                 'message' => 'Hanya akun siswa yang dapat mengakses skor presensi.',
             ], 403);
         }
-
         $siswa = $user->siswa;
-
-        // Ambil data 7 hari terakhir (minggu terbaru)
         $sevenDaysAgo = now()->subDays(7)->startOfDay();
         $today = now()->endOfDay();
 
         $absensi = Absensi::query()
+            ->with('sesiAbsensi')
             ->where('siswa_id', $siswa->id)
             ->whereHas('sesiAbsensi', function ($q) use ($sevenDaysAgo, $today) {
                 $q->whereBetween('tanggal', [$sevenDaysAgo, $today]);
             })
             ->get();
-
         if ($absensi->isEmpty()) {
             return response()->json([
                 'score' => 100,
                 'tier' => 'Emas',
                 'color' => '#FFD700',
+                'statistics' => [
+                    'total_sessions' => 0,
+                    'hadir' => 0,
+                    'terlambat' => 0,
+                    'izin' => 0,
+                    'sakit' => 0,
+                    'alpa' => 0,
+                ],
+                'breakdown' => [
+                    'class_only' => [
+                        'hadir' => 0,
+                        'terlambat' => 0,
+                        'izin' => 0,
+                        'sakit' => 0,
+                        'alpa' => 0,
+                    ],
+                    'mapel' => [
+                        'hadir' => 0,
+                        'terlambat' => 0,
+                        'izin' => 0,
+                        'sakit' => 0,
+                        'alpa' => 0,
+                    ],
+                ],
+                'message' => 'Belum ada data presensi minggu ini',
             ]);
         }
-
         $totalPoints = 0;
         $totalSessions = 0;
+        $mapelStats = [
+            'hadir' => 0,
+            'terlambat' => 0,
+            'izin' => 0,
+            'sakit' => 0,
+            'alpa' => 0,
+        ];
 
+        $overallStats = [
+            'hadir' => 0,
+            'terlambat' => 0,
+            'izin' => 0,
+            'sakit' => 0,
+            'alpa' => 0,
+        ];
         foreach ($absensi as $a) {
             $totalSessions++;
-
+            $status = $a->status;
+            if (isset($overallStats[$status])) {
+                $overallStats[$status]++;
+            }
+            if (isset($mapelStats[$status])) {
+                $mapelStats[$status]++;
+            }
             $totalPoints += match ($a->status) {
                 'hadir' => 100,
                 'terlambat' => 50,
@@ -254,6 +253,21 @@ class AttendanceController extends Controller
             'score' => round($score, 2),
             'tier' => $tier,
             'color' => $color,
+            'statistics' => [
+                'total_sessions' => $totalSessions,
+                'hadir' => $overallStats['hadir'],
+                'terlambat' => $overallStats['terlambat'],
+                'izin' => $overallStats['izin'],
+                'sakit' => $overallStats['sakit'],
+                'alpa' => $overallStats['alpa'],
+            ],
+            'breakdown' => [
+                'mapel' => $mapelStats,
+            ],
+            'period' => [
+                'start_date' => $sevenDaysAgo->toDateString(),
+                'end_date' => $today->toDateString(),
+            ],
         ]);
     }
 
@@ -271,21 +285,10 @@ class AttendanceController extends Controller
 
         $siswa = $user->siswa;
 
-        // Cari sesi aktif yang sesuai dengan kelas siswa
-        $sesiQuery = SesiAbsensi::with(['guruMapel.mapel', 'guruMapel.kelas', 'guruMapel.guru.user', 'kelas.waliKelas.user'])
+        $sesiQuery = SesiAbsensi::with(['guruMapel.mapel', 'guruMapel.kelas', 'guruMapel.guru.user'])
             ->where('status', 'berjalan')
-            ->where(function ($query) use ($siswa) {
-                // Sesi reguler - cocok dengan kelas siswa
-                $query->where('is_kelas_only', false)
-                    ->whereHas('guruMapel', function ($q) use ($siswa) {
-                        $q->where('kelas_id', $siswa->kelas_id);
-                    });
-
-                // Sesi kelas saja - siswa bisa scan jika ada sesi kelas untuk kelasnya
-                $query->orWhere(function ($q) use ($siswa) {
-                    $q->where('is_kelas_only', true)
-                        ->where('kelas_id', $siswa->kelas_id);
-                });
+            ->whereHas('guruMapel', function ($query) use ($siswa) {
+                $query->where('kelas_id', $siswa->kelas_id);
             });
 
         $sesi = $sesiQuery->latest()->first();
@@ -296,18 +299,6 @@ class AttendanceController extends Controller
             ]);
         }
 
-        $mapel = $sesi->is_kelas_only
-            ? 'Absensi Kelas'
-            : $sesi->guruMapel?->mapel?->nama_mapel;
-
-        $kelasNama = $sesi->is_kelas_only
-            ? ($sesi->kelas?->nama_kelas ?? '-')
-            : $sesi->guruMapel?->kelas?->nama_kelas;
-
-        $guru = $sesi->is_kelas_only
-            ? ($sesi->kelas?->waliKelas?->user?->name ?? '-')
-            : $sesi->guruMapel?->guru?->user?->name;
-
         return response()->json([
             'active_session' => [
                 'sesi_absensi_id' => $sesi->id,
@@ -316,10 +307,9 @@ class AttendanceController extends Controller
                 'tanggal' => optional($sesi->tanggal)->toDateString(),
                 'waktu_mulai' => $sesi->waktu_mulai,
                 'estimated_close' => optional($sesi->created_at)?->copy()->addHours(3)?->toDateTimeString(),
-                'mapel' => $mapel,
-                'kelas' => $kelasNama,
-                'guru' => $guru,
-                'is_kelas_only' => $sesi->is_kelas_only ?? false,
+                'mapel' => $sesi->guruMapel?->mapel?->nama_mapel,
+                'kelas' => $sesi->guruMapel?->kelas?->nama_kelas,
+                'guru' => $sesi->guruMapel?->guru?->user?->name,
             ],
         ]);
     }

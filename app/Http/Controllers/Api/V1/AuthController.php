@@ -7,34 +7,42 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'email' => ['required', 'string'],
-            'password' => ['required', 'string'],
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string', 'min:6'],
             'device_name' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $email = $request->email;
+        $email = strtolower(trim($request->email));
         $password = $request->password;
 
+        // Cari berdasarkan email terlebih dahulu (utama)
         $user = User::query()
-            ->where('email', $email)
-            ->orWhereHas('siswa', function ($query) use ($email) {
-                $query->where('nisn', $email);
-            })
+            ->whereRaw('LOWER(email) = ?', [$email])
             ->first();
+
+        // Jika tidak ketemu, coba cari via NISN (fallback)
+        if (!$user) {
+            $user = User::query()
+                ->whereHas('siswa', function ($query) use ($email) {
+                    $query->where('nisn', $email);
+                })
+                ->first();
+        }
 
         if (! $user || ! Hash::check($password, $user->password)) {
             return response()->json([
-                'message' => 'Email atau password tidak valid.',
+                'message' => 'Email/NISN atau password tidak valid.',
             ], 401);
         }
 
-        $deviceName = $request->device_name ?? 'flutter-client';
+        $deviceName = $request->device_name ?? 'mobile-app-' . Str::random(8);
         $token = $user->createToken($deviceName)->plainTextToken;
 
         return response()->json([
