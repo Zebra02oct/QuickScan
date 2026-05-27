@@ -24,22 +24,12 @@
                 </div>
                 <div>
                     <h2 class="text-base sm:text-lg font-bold text-gray-800 leading-tight">
-                        @if ($sesi->is_kelas_only)
-                            {{ Str::title($sesi->kelas->nama_kelas ?? 'Absensi Kelas') }}
-                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 align-middle ml-1">WALI KELAS</span>
-                        @else
-                            {{ Str::title($sesi->guruMapel->mapel->nama_mapel ?? 'Mapel Tidak Diketahui') }}
-                            ({{ $sesi->guruMapel->mapel->kode_mapel ?? 'Kode Mapel Tidak Diketahui' }})
-                        @endif
+                        {{ Str::title($sesi->guruMapel->mapel->nama_mapel ?? 'Mapel Tidak Diketahui') }}
+                        ({{ $sesi->guruMapel->mapel->kode_mapel ?? 'Kode Mapel Tidak Diketahui' }})
                     </h2>
                     <p class="text-[11px] sm:text-sm font-medium text-sky-600 mt-1 flex items-center gap-1.5 flex-wrap">
-                        @if ($sesi->is_kelas_only)
-                            <i class="ri-user-settings-line"></i>
-                            {{ $sesi->kelas->nama_kelas ?? 'Kelas Tidak Diketahui' }}
-                        @else
-                            <i class="ri-building-4-line"></i>
-                            {{ $sesi->guruMapel->kelas->nama_kelas ?? 'Kelas Tidak Diketahui' }}
-                        @endif
+                        <i class="ri-building-4-line"></i>
+                        {{ $sesi->guruMapel->kelas->nama_kelas ?? 'Kelas Tidak Diketahui' }}
                         <span class="text-gray-300 hidden sm:inline">|</span>
                         <i class="ri-calendar-event-line ml-1 sm:ml-0"></i>
                         {{ \Carbon\Carbon::parse($sesi->tanggal)->translatedFormat('l, d M Y') }}

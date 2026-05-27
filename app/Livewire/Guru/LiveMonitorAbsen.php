@@ -3,7 +3,6 @@
 namespace App\Livewire\Guru;
 
 use App\Models\Absensi;
-use App\Models\Kelas;
 use App\Models\SesiAbsensi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,12 +20,10 @@ class LiveMonitorAbsen extends Component
 
     public $sesi_ids = [];
     public $current_qr_token;
-    public $is_kelas_only = false;
 
     public $mapel_nama;
     public $kode_mapel;
     public $kelas_nama = [];
-    public $kelas_id = null;
 
     public function mount($token = null)
     {
@@ -46,7 +43,6 @@ class LiveMonitorAbsen extends Component
             $sesi = SesiAbsensi::with([
                 'guruMapel.mapel',
                 'guruMapel.kelas',
-                'kelas.waliKelas.user'
             ])
                 ->where('token_qr', $token)
                 ->where('status', 'berjalan')
@@ -62,29 +58,9 @@ class LiveMonitorAbsen extends Component
             }
 
             // Cek apakah guru punya akses ke sesi ini
-            $hasAccess = false;
+            $hasAccess = $sesi->guru_mapel_id && $sesi->guruMapel && $sesi->guruMapel->guru_id == $guruId;
 
-            if ($sesi->is_kelas_only) {
-                // Cek apakah guru adalah wali kelas dari kelas ini
-                // Bisa dicek via kelas_id langsung atau via wali_kelas_id
-                $kelas = $sesi->kelas;
-
-                // Jika guru adalah wali kelas dari kelas ini
-                $isWaliKelas = $kelas && $kelas->guru_id == $guruId;
-
-                // Atau jika wali_kelas_id cocok
-                $isWaliKelasById = $sesi->wali_kelas_id == $guruId;
-
-                if ($isWaliKelas || $isWaliKelasById) {
-                    $hasAccess = true;
-                    $this->is_kelas_only = true;
-                    $this->kelas_id = $sesi->kelas_id;
-                    $this->mapel_nama = 'Absensi Kelas';
-                    $this->kode_mapel = 'KELAS';
-                    $this->kelas_nama = [$kelas ? $kelas->nama_kelas : 'Kelas'];
-                }
-            } elseif ($sesi->guru_mapel_id && $sesi->guruMapel && $sesi->guruMapel->guru_id == $guruId) {
-                $hasAccess = true;
+            if ($hasAccess) {
                 $this->mapel_nama = $sesi->guruMapel->mapel->nama_mapel ?? 'Tidak Diketahui';
                 $this->kode_mapel = $sesi->guruMapel->mapel->kode_mapel ?? '-';
                 $this->kelas_nama = [$sesi->guruMapel->kelas->nama_kelas ?? '-'];
@@ -108,22 +84,10 @@ class LiveMonitorAbsen extends Component
         }
 
         // Jika tidak ada token, cari sesi aktif
-        $baseQuery = SesiAbsensi::with(['guruMapel.mapel', 'guruMapel.kelas', 'kelas'])
+        $baseQuery = SesiAbsensi::with(['guruMapel.mapel', 'guruMapel.kelas'])
             ->where('status', 'berjalan')
-            ->where(function ($query) use ($guruId) {
-                // Sesi reguler (dengan mapel)
-                $query->where(function ($q) use ($guruId) {
-                    $q->whereHas('guruMapel', function ($subQ) use ($guruId) {
-                        $subQ->where('guru_id', $guruId);
-                    })
-                        ->where('is_kelas_only', false);
-                });
-
-                // Sesi kelas (wali kelas)
-                $query->orWhere(function ($q) use ($guruId) {
-                    $q->where('is_kelas_only', true)
-                        ->where('wali_kelas_id', $guruId);
-                });
+            ->whereHas('guruMapel', function ($query) use ($guruId) {
+                $query->where('guru_id', $guruId);
             });
 
         $sesis = $baseQuery->get();
@@ -136,25 +100,9 @@ class LiveMonitorAbsen extends Component
         $firstSesi = $sesis->first();
         $this->sesi_ids = $sesis->pluck('id')->toArray();
         $this->current_qr_token = $firstSesi->token_qr;
-        $this->is_kelas_only = $firstSesi->is_kelas_only;
-
-        if ($this->is_kelas_only) {
-            // Untuk sesi kelas saja, gunakan kelas_id dari session, bukan query dari guru
-            $kelas = $firstSesi->kelas;
-            if ($kelas) {
-                $this->kelas_id = $kelas->id;
-                $this->mapel_nama = 'Absensi Kelas';
-                $this->kode_mapel = 'KELAS';
-                $this->kelas_nama = [$kelas->nama_kelas];
-            } else {
-                session()->flash('error', 'Data kelas tidak ditemukan untuk sesi ini.');
-                return redirect()->route('guru.dashboard');
-            }
-        } else {
-            $this->mapel_nama = $firstSesi->guruMapel->mapel->nama_mapel ?? 'Tidak Diketahui';
-            $this->kode_mapel = $firstSesi->guruMapel->mapel->kode_mapel ?? '-';
-            $this->kelas_nama = $sesis->map(fn($s) => $s->guruMapel->kelas->nama_kelas)->toArray();
-        }
+        $this->mapel_nama = $firstSesi->guruMapel->mapel->nama_mapel ?? 'Tidak Diketahui';
+        $this->kode_mapel = $firstSesi->guruMapel->mapel->kode_mapel ?? '-';
+        $this->kelas_nama = $sesis->map(fn($s) => $s->guruMapel->kelas->nama_kelas)->toArray();
     }
 
     public function refreshQR()
@@ -169,36 +117,6 @@ class LiveMonitorAbsen extends Component
     #[Computed]
     public function listSiswa()
     {
-        $guruId = Auth::user()->guru->id;
-
-        if ($this->is_kelas_only && $this->kelas_id) {
-            // Ambil siswa dari kelas_id langsung
-            $kelas = Kelas::with(['siswas.user'])->where('id', $this->kelas_id)->first();
-
-            if (!$kelas) {
-                return collect();
-            }
-
-            $absensis = Absensi::whereIn('sesi_absensi_id', $this->sesi_ids)->get()->keyBy('siswa_id');
-
-            $dataSiswa = collect();
-            foreach ($kelas->siswas as $siswa) {
-                $absen = $absensis->get($siswa->id);
-
-                $dataSiswa->push([
-                    'id' => $siswa->id,
-                    'sesi_id' => $this->sesi_ids[0] ?? 0,
-                    'nama_siswa' => $siswa->user->name ?? 'User Tidak Ditemukan',
-                    'kelas' => $kelas->nama_kelas,
-                    'status' => $absen ? $absen->status : 'menunggu',
-                    'waktu_scan' => $absen ? $absen->waktu_scan : null,
-                ]);
-            }
-
-            return $dataSiswa->sortByDesc('waktu_scan')->values();
-        }
-
-        // Sesi reguler (dengan mapel)
         $sesiQuery = SesiAbsensi::with('guruMapel.kelas.siswas.user')->whereIn('id', $this->sesi_ids);
         $sesis = $sesiQuery->get();
 
@@ -270,72 +188,32 @@ class LiveMonitorAbsen extends Component
     {
         try {
             DB::transaction(function () {
-                $guruId = Auth::user()->guru->id;
+                $sesis = SesiAbsensi::with('guruMapel.kelas.siswas')->whereIn('id', $this->sesi_ids)->get();
+                $siswaSudahAbsen = Absensi::whereIn('sesi_absensi_id', $this->sesi_ids)->pluck('siswa_id')->toArray();
 
-                if ($this->is_kelas_only && $this->kelas_id) {
-                    // Tutup sesi kelas saja
-                    $kelas = Kelas::with('siswas')->where('id', $this->kelas_id)->first();
+                foreach ($sesis as $sesi) {
+                    $sesi->update([
+                        'status' => 'selesai',
+                        'waktu_selesai' => now()->toTimeString(),
+                        'token_qr' => null,
+                    ]);
 
-                    if ($kelas) {
-                        $semuaSiswaKelas = $kelas->siswas->pluck('id')->toArray();
-                        $siswaSudahAbsen = Absensi::whereIn('sesi_absensi_id', $this->sesi_ids)->pluck('siswa_id')->toArray();
-                        $siswaBelumAbsen = array_diff($semuaSiswaKelas, $siswaSudahAbsen);
+                    $semuaSiswaKelasIni = $sesi->guruMapel->kelas->siswas->pluck('id')->toArray();
+                    $siswaBelumAbsen = array_diff($semuaSiswaKelasIni, $siswaSudahAbsen);
 
-                        foreach ($this->sesi_ids as $sesiId) {
-                            $sesi = SesiAbsensi::find($sesiId);
-                            $sesi->update([
-                                'status' => 'selesai',
-                                'waktu_selesai' => now()->toTimeString(),
-                                'token_qr' => null
-                            ]);
-                        }
-
-                        $dataAlpa = [];
-                        foreach ($siswaBelumAbsen as $idSiswa) {
-                            $dataAlpa[] = [
-                                'sesi_absensi_id' => $this->sesi_ids[0],
-                                'siswa_id' => $idSiswa,
-                                'status' => 'alpa',
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ];
-                        }
-
-                        if (!empty($dataAlpa)) {
-                            Absensi::insert($dataAlpa);
-                        }
+                    $dataAlpa = [];
+                    foreach ($siswaBelumAbsen as $idSiswa) {
+                        $dataAlpa[] = [
+                            'sesi_absensi_id' => $sesi->id,
+                            'siswa_id' => $idSiswa,
+                            'status' => 'alpa',
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
                     }
-                } else {
-                    // Tutup sesi reguler (dengan mapel)
-                    $sesiQuery = SesiAbsensi::with('guruMapel.kelas.siswas')->whereIn('id', $this->sesi_ids);
-                    $sesis = $sesiQuery->get();
 
-                    $siswaSudahAbsen = Absensi::whereIn('sesi_absensi_id', $this->sesi_ids)->pluck('siswa_id')->toArray();
-
-                    foreach ($sesis as $sesi) {
-                        $sesi->update([
-                            'status' => 'selesai',
-                            'waktu_selesai' => now()->toTimeString(),
-                            'token_qr' => null
-                        ]);
-
-                        $semuaSiswaKelasIni = $sesi->guruMapel->kelas->siswas->pluck('id')->toArray();
-                        $siswaBelumAbsen = array_diff($semuaSiswaKelasIni, $siswaSudahAbsen);
-
-                        $dataAlpa = [];
-                        foreach ($siswaBelumAbsen as $idSiswa) {
-                            $dataAlpa[] = [
-                                'sesi_absensi_id' => $sesi->id,
-                                'siswa_id' => $idSiswa,
-                                'status' => 'alpa',
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ];
-                        }
-
-                        if (!empty($dataAlpa)) {
-                            Absensi::insert($dataAlpa);
-                        }
+                    if (! empty($dataAlpa)) {
+                        Absensi::insert($dataAlpa);
                     }
                 }
             });

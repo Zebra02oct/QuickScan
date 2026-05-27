@@ -16,22 +16,11 @@ class SesiAbsensi extends Model
 
     protected $casts = [
         'tanggal' => 'date',
-        'is_kelas_only' => 'boolean',
     ];
 
     public function guruMapel(): BelongsTo
     {
         return $this->belongsTo(GuruMapel::class);
-    }
-
-    public function kelas(): BelongsTo
-    {
-        return $this->belongsTo(Kelas::class);
-    }
-
-    public function waliKelas(): BelongsTo
-    {
-        return $this->belongsTo(Guru::class, 'wali_kelas_id');
     }
 
     public function absensis()
@@ -41,26 +30,18 @@ class SesiAbsensi extends Model
 
     public static function tutupSesiOtomatis()
     {
-        $sesiLama = self::where('status', 'berjalan')
+        $sesiLama = self::where('status', '=', 'berjalan')
+            ->whereNotNull('guru_mapel_id')
             ->where('created_at', '<=', now()->subHours(3))
+            ->with(['guruMapel.kelas.siswas'])
             ->get();
 
         foreach ($sesiLama as $sesi) {
-            $siswaSudahAbsen = Absensi::where('sesi_absensi_id', $sesi->id)
+            $siswaSudahAbsen = Absensi::where('sesi_absensi_id', '=', $sesi->id)
                 ->pluck('siswa_id')
                 ->toArray();
 
-            // Ambil siswa berdasarkan tipe sesi
-            if ($sesi->is_kelas_only && $sesi->kelas_id) {
-                // Untuk sesi kelas saja, ambil dari kelas_id langsung
-                $kelas = $sesi->kelas;
-                $semuaSiswaKelas = $kelas ? $kelas->siswas->pluck('id')->toArray() : [];
-            } elseif ($sesi->guru_mapel_id && $sesi->guruMapel) {
-                // Untuk sesi reguler (dengan mapel)
-                $semuaSiswaKelas = $sesi->guruMapel->kelas->siswas->pluck('id')->toArray();
-            } else {
-                $semuaSiswaKelas = [];
-            }
+            $semuaSiswaKelas = $sesi->guruMapel?->kelas?->siswas?->pluck('id')->toArray() ?? [];
 
             $siswaAlpa = array_diff($semuaSiswaKelas, $siswaSudahAbsen);
 

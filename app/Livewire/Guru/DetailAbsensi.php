@@ -13,8 +13,8 @@ use Livewire\Component;
 class DetailAbsensi extends Component
 {
 
- #[Layout('layouts.app')]
-#[Title('Detail Absensi')]
+    #[Layout('layouts.app')]
+    #[Title('Detail Absensi')]
 
     public $sesi_id;
     public $sesi;
@@ -24,11 +24,9 @@ class DetailAbsensi extends Component
     {
         $this->sesi_id = $sesi_id;
 
-        // Load sesi dengan relasi yang sesuai, tangani kelas_only
         $this->sesi = SesiAbsensi::with([
             'guruMapel.mapel',
             'guruMapel.kelas',
-            'kelas.waliKelas'
         ])->findOrFail($sesi_id);
     }
 
@@ -73,7 +71,7 @@ class DetailAbsensi extends Component
         if ($absen) {
             $absen->update(['status' => $statusBaru]);
 
-             $this->dispatch('swal:success', [
+            $this->dispatch('swal:success', [
                 'title' => 'Berhasil!',
                 'text' => 'Status Berhasil Diubah.'
             ]);

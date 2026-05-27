@@ -6,15 +6,9 @@
         <div class="flex items-center gap-4">
             <div class="w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.6)]"></div>
             <div>
-                @if ($is_kelas_only)
-                    <h1 class="text-xl sm:text-2xl font-black text-gray-800 tracking-tight">
-                        LIVE: ABSENSI KELAS
-                    </h1>
-                @else
-                    <h1 class="text-xl sm:text-2xl font-black text-gray-800 tracking-tight">
-                        LIVE: {{ Str::title($mapel_nama) }} ({{ $kode_mapel }})
-                    </h1>
-                @endif
+                <h1 class="text-xl sm:text-2xl font-black text-gray-800 tracking-tight">
+                    LIVE: {{ Str::title($mapel_nama) }} ({{ $kode_mapel }})
+                </h1>
                 <p class="text-sm sm:text-base font-bold text-sky-600 mt-0.5">
                     Kelas: {{ implode(', ', $kelas_nama) }}
                 </p>
@@ -38,14 +32,14 @@
 
         <div x-data="{
             waktu: sessionStorage.getItem('sisaWaktuQR') ? parseInt(sessionStorage.getItem('sisaWaktuQR')) : 10,
-
+        
             init() {
                 if (this.waktu <= 0) this.waktu = 10;
-
+        
                 setInterval(() => {
                     this.waktu--;
                     sessionStorage.setItem('sisaWaktuQR', this.waktu);
-
+        
                     if (this.waktu <= 0) {
                         $wire.refreshQR();
                         this.waktu = 10;
@@ -59,13 +53,8 @@
             <div class="absolute top-0 right-0 w-32 h-32 bg-sky-50 rounded-bl-full -z-10"></div>
             <div class="absolute bottom-0 left-0 w-32 h-32 bg-orange-50 rounded-tr-full -z-10"></div>
 
-            @if ($is_kelas_only)
-                <h2 class="text-3xl font-black text-slate-800 mb-2">Scan Hadir</h2>
-                <p class="text-slate-500 font-medium mb-8">Buka aplikasi AbsensiKu di HP</p>
-            @else
-                <h2 class="text-3xl font-black text-slate-800 mb-2">Scan Hadir</h2>
-                <p class="text-slate-500 font-medium mb-8">Buka aplikasi AbsensiKu di HP</p>
-            @endif
+            <h2 class="text-3xl font-black text-slate-800 mb-2">Scan Hadir</h2>
+            <p class="text-slate-500 font-medium mb-8">Buka aplikasi AbsensiKu di HP</p>
 
             <div class="p-4 bg-white border-4 border-slate-100 rounded-3xl shadow-xl mb-8 relative">
 
@@ -98,13 +87,20 @@
                     @php
                         $listSiswa = $this->listSiswa;
                         $totalSiswa = is_countable($listSiswa) ? count($listSiswa) : 0;
-                        $jumlahHadir = is_countable($listSiswa) ? $listSiswa->where('status', 'hadir')->count() + $listSiswa->where('status', 'terlambat')->count() : 0;
-                        $jumlahMenunggu = is_countable($listSiswa) ? $listSiswa->where('status', 'menunggu')->count() : 0;
+                        $jumlahHadir = is_countable($listSiswa)
+                            ? $listSiswa->where('status', 'hadir')->count() +
+                                $listSiswa->where('status', 'terlambat')->count()
+                            : 0;
+                        $jumlahMenunggu = is_countable($listSiswa)
+                            ? $listSiswa->where('status', 'menunggu')->count()
+                            : 0;
                     @endphp
-                    <div class="text-xs font-bold text-slate-500 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 shadow-sm">
+                    <div
+                        class="text-xs font-bold text-slate-500 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 shadow-sm">
                         Hadir: <span class="text-green-600 text-sm">{{ $jumlahHadir }}</span>
                     </div>
-                    <div class="text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                    <div
+                        class="text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
                         Total: <span class="text-slate-600 text-sm">{{ $totalSiswa }}</span>
                     </div>
                 </div>
@@ -141,14 +137,12 @@
 
                                 <td class="px-5 py-3 text-center whitespace-nowrap">
                                     @if ($siswa['waktu_scan'])
-
                                         <span
                                             class="inline-flex items-center gap-1 bg-gray-100 px-2.5 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium border border-gray-200 font-mono text-slate-600 shadow-sm">
                                             <i class="ri-time-line text-gray-400"></i>
                                             {{ $siswa['waktu_scan'] }}
                                         </span>
                                     @else
-
                                         <span
                                             class="inline-flex items-center gap-1 bg-slate-50 text-slate-500 px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium border border-slate-200 border-dashed"
                                             title="Tidak melakukan scan via sistem">

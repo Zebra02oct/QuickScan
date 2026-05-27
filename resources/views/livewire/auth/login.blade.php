@@ -1,3 +1,13 @@
+@php
+    use App\Models\Guru;
+    use App\Models\Kelas;
+    use App\Models\Siswa;
+
+    $totalSiswa = Siswa::count();
+    $totalGuru = Guru::count();
+    $totalKelas = Kelas::where('is_active', true)->count();
+@endphp
+
 <div class="min-h-screen flex overflow-hidden bg-white">
     <div
         class="hidden lg:flex lg:w-2/5 relative flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-sky-400 via-sky-500 to-sky-700">
@@ -51,11 +61,15 @@
             <div class="flex gap-4 justify-center mt-8">
                 <div
                     class="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm font-medium shadow-sm">
-                    <i class="ri-group-line mr-1"></i>847 Siswa
+                    <i class="ri-group-line mr-1"></i>{{ $totalSiswa }} Siswa
                 </div>
                 <div
                     class="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm font-medium shadow-sm">
-                    <i class="ri-building-line mr-1"></i>24 Kelas
+                    <i class="ri-building-line mr-1"></i>{{ $totalKelas }} Kelas
+                </div>
+                <div
+                    class="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm font-medium shadow-sm">
+                    <i class="ri-user-star-line mr-1"></i>{{ $totalGuru }} Guru
                 </div>
             </div>
         </div>

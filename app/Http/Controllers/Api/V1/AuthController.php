@@ -34,6 +34,12 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if ($user->status !== 'aktif') {
+            return response()->json([
+                'message' => 'Akun Anda tidak aktif. Hubungi admin sekolah.',
+            ], 403);
+        }
+
         $deviceName = $request->device_name ?? 'flutter-client';
         $token = $user->createToken($deviceName)->plainTextToken;
 

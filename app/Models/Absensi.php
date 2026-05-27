@@ -4,13 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Absensi extends Model
 {
     use HasFactory;
 
-    protected $table = 'absensis'; 
+    protected $table = 'absensis';
     protected $guarded = ['id'];
 
     public function siswa()
@@ -22,9 +21,4 @@ class Absensi extends Model
     {
         return $this->belongsTo(SesiAbsensi::class, 'sesi_absensi_id');
     }
-
-   
-
-
-    
 }

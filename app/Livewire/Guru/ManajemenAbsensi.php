@@ -18,9 +18,9 @@ class ManajemenAbsensi extends Component
 {
     use WithPagination;
 
-      #[Layout('layouts.app')]
+    #[Layout('layouts.app')]
     #[Title('Manajeman Absensi')]
-    
+
     public $search = '';
     public $filter_kelas_id = '';
     public $filter_mapel_id = '';
@@ -28,7 +28,7 @@ class ManajemenAbsensi extends Component
     public $tanggal_mulai = '';
     public $tanggal_akhir = '';
 
-public function updating($property)
+    public function updating($property)
     {
         if (in_array($property, ['search', 'filter_kelas_id', 'filter_mapel_id', 'tanggal_mulai', 'tanggal_akhir'])) {
             $this->resetPage();
@@ -44,16 +44,16 @@ public function updating($property)
     #[Computed]
     public function guruId()
     {
-        return Auth::user()->guru->id; 
+        return Auth::user()->guru->id;
     }
-    
-      #[Computed]
+
+    #[Computed]
     public function myGuruMapelIds()
     {
         return GuruMapel::where('guru_id', $this->guruId)->pluck('id');
     }
 
-      #[Computed]
+    #[Computed]
     public function daftarKelas()
     {
         return GuruMapel::where('guru_id', $this->guruId)
@@ -81,21 +81,10 @@ public function updating($property)
     {
         $guruId = $this->guruId;
 
-        // Ambil guru_mapel_ids untuk sesi reguler
         $guruMapelIds = GuruMapel::where('guru_id', $guruId)->pluck('id');
 
-        $query = SesiAbsensi::with(['guruMapel.mapel', 'guruMapel.kelas', 'kelas'])
-            ->where(function ($q) use ($guruId, $guruMapelIds) {
-                // Sesi reguler (dengan guru_mapel_id)
-                $q->whereIn('guru_mapel_id', $guruMapelIds)
-                    ->where('is_kelas_only', false);
-
-                // Sesi kelas saja (wali kelas)
-                $q->orWhere(function ($q2) use ($guruId) {
-                    $q2->where('is_kelas_only', true)
-                        ->where('wali_kelas_id', $guruId);
-                });
-            })
+        $query = SesiAbsensi::with(['guruMapel.mapel', 'guruMapel.kelas'])
+            ->whereIn('guru_mapel_id', $guruMapelIds)
             ->withCount([
                 'absensis as hadir_count' => function ($q) {
                     $q->whereIn('status', ['hadir', 'terlambat']);
@@ -109,13 +98,8 @@ public function updating($property)
             ]);
 
         if ($this->filter_kelas_id) {
-            $query->where(function ($q) {
-                $q->whereHas('guruMapel', function ($q2) {
-                    $q2->where('kelas_id', $this->filter_kelas_id);
-                })->orWhere(function ($q3) {
-                    $q3->where('is_kelas_only', true)
-                        ->where('kelas_id', $this->filter_kelas_id);
-                });
+            $query->whereHas('guruMapel', function ($q) {
+                $q->where('kelas_id', $this->filter_kelas_id);
             });
         }
 
@@ -139,11 +123,6 @@ public function updating($property)
                     $q2->where('nama_kelas', 'like', '%' . $search . '%');
                 })->orWhereHas('guruMapel.mapel', function ($q3) use ($search) {
                     $q3->where('nama_mapel', 'like', '%' . $search . '%');
-                })->orWhere(function ($q4) use ($search) {
-                    $q4->where('is_kelas_only', true)
-                        ->whereHas('kelas', function ($q5) use ($search) {
-                            $q5->where('nama_kelas', 'like', '%' . $search . '%');
-                        });
                 });
             });
         }
@@ -152,42 +131,41 @@ public function updating($property)
     }
 
 
-#[On('hapus-data-absen')]
-public function hapusSesi($id)
-{
-    $sesi = SesiAbsensi::find($id);
+    #[On('hapus-data-absen')]
+    public function hapusSesi($id)
+    {
+        $sesi = SesiAbsensi::find($id);
 
-    if ($sesi) {
-        $isLocked = \Carbon\Carbon::parse($sesi->created_at)->addDays(7)->isPast();
-        
-        if ($isLocked) {
-            // Sesi terkunci
-            $this->dispatch('swal:error', [
-                'title' => 'Gagal Dihapus',
-                'text'  => 'Sesi sudah terkunci karena melewati batas 7 hari.'
-            ]);
-            return; 
-        }
+        if ($sesi) {
+            $isLocked = \Carbon\Carbon::parse($sesi->created_at)->addDays(7)->isPast();
 
-        try {
-            DB::transaction(function () use ($sesi) {
-               Absensi::where('sesi_absensi_id', $sesi->id)->delete();
-                $sesi->delete();
-            });
+            if ($isLocked) {
+                // Sesi terkunci
+                $this->dispatch('swal:error', [
+                    'title' => 'Gagal Dihapus',
+                    'text'  => 'Sesi sudah terkunci karena melewati batas 7 hari.'
+                ]);
+                return;
+            }
 
-            $this->dispatch('swal:success', [
-                'title' => 'Berhasil!',
-                'text'  => 'Data sesi beserta riwayat absen berhasil dihapus.'
-            ]);
+            try {
+                DB::transaction(function () use ($sesi) {
+                    Absensi::where('sesi_absensi_id', $sesi->id)->delete();
+                    $sesi->delete();
+                });
 
-        } catch (\Exception $e) {
-            $this->dispatch('swal:error', [
-                'title' => 'Terjadi Kesalahan Sistem',
-                'text'  => 'Gagal menghapus data. Pesan: ' . $e->getMessage()
-            ]);
+                $this->dispatch('swal:success', [
+                    'title' => 'Berhasil!',
+                    'text'  => 'Data sesi beserta riwayat absen berhasil dihapus.'
+                ]);
+            } catch (\Exception $e) {
+                $this->dispatch('swal:error', [
+                    'title' => 'Terjadi Kesalahan Sistem',
+                    'text'  => 'Gagal menghapus data. Pesan: ' . $e->getMessage()
+                ]);
+            }
         }
     }
-}
 
     public function render()
     {

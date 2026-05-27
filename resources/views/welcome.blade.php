@@ -1,4 +1,14 @@
 <!DOCTYPE html>
+@php
+    use App\Models\Guru;
+    use App\Models\Kelas;
+    use App\Models\Siswa;
+
+    $totalSiswa = Siswa::count();
+    $totalGuru = Guru::count();
+    $totalKelas = Kelas::where('is_active', true)->count();
+@endphp
+
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
@@ -79,17 +89,17 @@
 
             <div class="flex items-center justify-center gap-6 mb-8">
                 <div class="text-center">
-                    <p class="text-xl font-bold text-sky-500">847</p>
+                    <p class="text-xl font-bold text-sky-500">{{ $totalSiswa }}</p>
                     <p class="text-xs text-gray-400">Siswa</p>
                 </div>
                 <div class="w-px h-8 bg-gray-200"></div>
                 <div class="text-center">
-                    <p class="text-xl font-bold text-sky-500">24</p>
+                    <p class="text-xl font-bold text-sky-500">{{ $totalGuru }}</p>
                     <p class="text-xs text-gray-400">Guru</p>
                 </div>
                 <div class="w-px h-8 bg-gray-200"></div>
                 <div class="text-center">
-                    <p class="text-xl font-bold text-sky-500">99</p>
+                    <p class="text-xl font-bold text-sky-500">{{ $totalKelas }}</p>
                     <p class="text-xs text-gray-400">Kelas</p>
                 </div>
             </div>

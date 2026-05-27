@@ -10,7 +10,7 @@
                     <i class='ri-folder-user-line text-2xl'></i>
                 </div>
                 <div>
-                    <h2 class="text-lg font-bold text-gray-800">Manajemen Absensi Kelas</h2>
+                    <h2 class="text-lg font-bold text-gray-800">Manajemen Absensi Mata Pelajaran</h2>
                     <p class="text-sm text-gray-500">Kelola dan pantau data presensi dari setiap pertemuan.</p>
                 </div>
             </div>
@@ -26,9 +26,9 @@
         <div class="p-4 sm:p-5">
             <div class="bg-slate-50 p-5 rounded-xl border border-gray-100 mb-6 shadow-inner">
 
-            
+
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
-              
+
                     <div class="flex items-center gap-3 shrink-0">
                         <div
                             class="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-200 flex items-center justify-center text-gray-500">
@@ -45,7 +45,7 @@
                     </div>
                 </div>
 
-               
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-200/60">
 
                     <div>
@@ -61,7 +61,7 @@
                         </select>
                     </div>
 
-                   
+
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Filter Mapel</label>
                         <select wire:model.live="filter_mapel_id"
@@ -77,14 +77,14 @@
                         </select>
                     </div>
 
-                
+
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Dari Tanggal</label>
                         <input type="date" wire:model.live="tanggal_mulai"
                             class="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all shadow-sm text-sm text-gray-600">
                     </div>
 
-                  
+
                     <div>
                         <label class="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">Sampai Tanggal</label>
                         <input type="date" wire:model.live="tanggal_akhir"
@@ -146,24 +146,14 @@
                                 </td>
 
                                 <td class="px-3 sm:px-4 py-2 sm:py-3 text-left">
-                                    @if ($row->is_kelas_only)
-                                        <div class="text-xs sm:text-sm font-bold text-slate-700">
-                                            {{ Str::title($row->kelas->nama_kelas ?? '-') }}
-                                        </div>
-                                        <div class="text-[11px] sm:text-xs text-amber-600 font-semibold mt-0.5">
-                                            <i class="ri-user-settings-line align-middle"></i>
-                                            Absensi Kelas (Wali Kelas)
-                                        </div>
-                                    @else
-                                        <div class="text-xs sm:text-sm font-bold text-slate-700">
-                                            {{ Str::title($row->guruMapel->mapel->nama_mapel ?? '-') }}
-                                            ({{ $row->guruMapel->mapel->kode_mapel ?? '-' }})
-                                        </div>
-                                        <div class="text-[11px] sm:text-xs text-indigo-600 font-semibold mt-0.5">
-                                            <i class="ri-building-4-line align-middle"></i>
-                                            {{ $row->guruMapel->kelas->nama_kelas ?? '-' }}
-                                        </div>
-                                    @endif
+                                    <div class="text-xs sm:text-sm font-bold text-slate-700">
+                                        {{ Str::title($row->guruMapel->mapel->nama_mapel ?? '-') }}
+                                        ({{ $row->guruMapel->mapel->kode_mapel ?? '-' }})
+                                    </div>
+                                    <div class="text-[11px] sm:text-xs text-indigo-600 font-semibold mt-0.5">
+                                        <i class="ri-building-4-line align-middle"></i>
+                                        {{ $row->guruMapel->kelas->nama_kelas ?? '-' }}
+                                    </div>
                                 </td>
 
                                 <td class="px-3 sm:px-4 py-2 sm:py-3 text-center whitespace-nowrap">
@@ -214,7 +204,7 @@
 
                                         @php
                                             $isLocked = \Carbon\Carbon::parse($row->created_at)->addDays(7)->isPast();
-                                            $namaMapelOrKelas = $row->is_kelas_only ? ($row->kelas->nama_kelas ?? 'Kelas') : ($row->guruMapel->mapel->nama_mapel ?? 'Mapel');
+                                            $namaMapelOrKelas = $row->guruMapel->mapel->nama_mapel ?? 'Mapel';
                                         @endphp
 
                                         @if (!$isLocked)
