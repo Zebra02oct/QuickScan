@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Notifications\SesiAbsensiNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Notification;
 
 class SesiAbsensi extends Model
 {
@@ -26,6 +28,17 @@ class SesiAbsensi extends Model
     public function absensis()
     {
         return $this->hasMany(Absensi::class, 'sesi_absensi_id');
+    }
+
+    public function notifyAssignedStudents(string $state): void
+    {
+        $this->loadMissing('guruMapel.kelas.siswas.user');
+
+        $users = $this->guruMapel?->kelas?->siswas?->map(fn ($siswa) => $siswa->user)->filter();
+
+        if ($users && $users->isNotEmpty()) {
+            Notification::send($users, new SesiAbsensiNotification($state, $this));
+        }
     }
 
     public static function tutupSesiOtomatis()
@@ -65,6 +78,8 @@ class SesiAbsensi extends Model
             if (!empty($dataInsert)) {
                 Absensi::insert($dataInsert);
             }
+
+            $sesi->notifyAssignedStudents('ditutup');
         }
     }
 }

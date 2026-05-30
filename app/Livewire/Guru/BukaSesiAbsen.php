@@ -120,13 +120,15 @@ class BukaSesiAbsen extends Component
 
         try {
             foreach ($this->kelas_terpilih as $guru_mapel_id) {
-                SesiAbsensi::create([
+                $sesi = SesiAbsensi::create([
                     'guru_mapel_id' => $guru_mapel_id,
                     'tanggal' => now()->toDateString(),
                     'waktu_mulai' => now()->toTimeString(),
                     'status' => 'berjalan',
                     'token_qr' => $tokenQr,
                 ]);
+
+                $sesi->notifyAssignedStudents('berlangsung');
             }
 
             $verifikasiSesi = SesiAbsensi::where('token_qr', $tokenQr)

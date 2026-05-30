@@ -172,6 +172,12 @@ class LiveMonitorAbsen extends Component
     #[On('eksekusi-batal-sesi')]
     public function hapusSesi()
     {
+        $sesis = SesiAbsensi::with('guruMapel.kelas.siswas.user')->whereIn('id', (array) $this->sesi_ids)->get();
+
+        foreach ($sesis as $sesi) {
+            $sesi->notifyAssignedStudents('dibatalkan');
+        }
+
         Absensi::whereIn('sesi_absensi_id', (array) $this->sesi_ids)->forceDelete();
 
         SesiAbsensi::whereIn('id', (array) $this->sesi_ids)->forceDelete();
@@ -215,6 +221,8 @@ class LiveMonitorAbsen extends Component
                     if (! empty($dataAlpa)) {
                         Absensi::insert($dataAlpa);
                     }
+
+                    $sesi->notifyAssignedStudents('ditutup');
                 }
             });
 

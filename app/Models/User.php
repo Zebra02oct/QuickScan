@@ -28,6 +28,7 @@ class User extends Authenticatable
         'status',
         'jenis_kelamin',
         'user_photo',
+        'fcm_token',
     ];
     /**
      * The attributes that should be hidden for serialization.
