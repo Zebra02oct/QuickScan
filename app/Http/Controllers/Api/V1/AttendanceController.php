@@ -170,15 +170,22 @@ class AttendanceController extends Controller
         if ($response = $this->ensureActiveStudent($request)) {
             return $response;
         }
-
         $user = $request->user()->loadMissing('siswa');
-
         $siswa = $user->siswa;
-
-        // Ambil data 7 hari terakhir (minggu terbaru)
         $sevenDaysAgo = now()->subDays(7)->startOfDay();
         $today = now()->endOfDay();
-
+        $totalSessions = \App\Models\SesiAbsensi::whereHas('guruMapel', function ($q) use ($siswa) {
+            $q->where('kelas_id', $siswa->kelas_id);
+        })
+            ->whereBetween('tanggal', [$sevenDaysAgo, $today])
+            ->count();
+        if ($totalSessions === 0) {
+            return response()->json([
+                'score' => 100,
+                'tier' => 'Emas',
+                'color' => '#FFD700',
+            ]);
+        }
         $absensi = Absensi::query()
             ->where('siswa_id', $siswa->id)
             ->whereHas('sesiAbsensi', function ($q) use ($sevenDaysAgo, $today) {
@@ -186,20 +193,9 @@ class AttendanceController extends Controller
             })
             ->get();
 
-        if ($absensi->isEmpty()) {
-            return response()->json([
-                'score' => 100,
-                'tier' => 'Emas',
-                'color' => '#FFD700',
-            ]);
-        }
-
         $totalPoints = 0;
-        $totalSessions = 0;
 
         foreach ($absensi as $a) {
-            $totalSessions++;
-
             $totalPoints += match ($a->status) {
                 'hadir' => 100,
                 'terlambat' => 50,
@@ -207,8 +203,10 @@ class AttendanceController extends Controller
             };
         }
 
+        // 3. PERBAIKAN: Skor dihitung dari total poin dibagi total sesi kelas yang sudah berjalan
         $score = ($totalPoints / $totalSessions);
 
+        // Menentukan Tier berdasarkan hasil pembagian riil
         if ($score >= 90) {
             $tier = 'Emas';
             $color = '#FFD700';

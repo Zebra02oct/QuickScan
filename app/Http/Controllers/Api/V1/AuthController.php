@@ -28,9 +28,15 @@ class AuthController extends Controller
             })
             ->first();
 
-        if (! $user || ! Hash::check($password, $user->password)) {
+        if (! $user) {
             return response()->json([
-                'message' => 'Email atau password tidak valid.',
+                'message' => 'NISN/Email tidak terdaftar.',
+            ], 404);
+        }
+
+        if (! Hash::check($password, $user->password)) {
+            return response()->json([
+                'message' => 'Password salah.',
             ], 401);
         }
 
@@ -77,6 +83,32 @@ class AuthController extends Controller
         ]);
     }
 
+    public function changePassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'old_password' => ['required', 'string'],
+            // 'confirmed' otomatis akan mengecek apakah isinya sama dengan 'new_password_confirmation'
+            'new_password' => ['required', 'string', 'min:6', 'confirmed'], 
+        ]);
+
+        $user = $request->user();
+
+        // Cek apakah password lama yang dimasukkan sesuai dengan di database
+        if (!Hash::check($request->old_password, $user->password)) {
+            return response()->json([
+                'message' => 'Password lama yang Anda masukkan salah.',
+            ], 400); // 400 Bad Request, ini akan ditangkap dengan pas oleh Flutter Anda
+        }
+
+        // Simpan password baru
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return response()->json([
+            'message' => 'Password berhasil diubah.',
+        ]);
+    }
     public function logout(Request $request): JsonResponse
     {
         $token = $request->user()->currentAccessToken();

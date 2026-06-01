@@ -36,13 +36,17 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithChunkReading
             $jk    = trim($row['jenis_kelamin'] ?? '');
 
          
-            if ($nama === '' && $nisn === '' && $email === '' && $jk === '') {
-                continue; 
+            if ($nama === '' && $nisn === '' && $jk === '') {
+                continue;
             }
 
-           
-            if ($nama === '' || $nisn === '' || $email === '' || $jk === '') {
-                throw new \Exception("Data Ditolak! Ada kolom yang belum diisi pada baris ke-{$barisExcel}. (Nama, NISN, Email, dan Jenis Kelamin wajib diisi semua).");
+            // Jika email kosong, auto-generate dari 3 digit terakhir NISN
+            if ($email === '') {
+                $email = substr($nisn, -3) . '@smk.belajar.id';
+            }
+
+            if ($nama === '' || $nisn === '' || $jk === '') {
+                throw new \Exception("Data Ditolak! Ada kolom yang belum diisi pada baris ke-{$barisExcel}. (Nama, NISN, dan Jenis Kelamin wajib diisi semua).");
             }
 
        

@@ -18,9 +18,12 @@ class SesiAbsensiNotification extends Notification
     public function via($notifiable): array
     {
         $channels = ['database'];
+
+        // Panggil kurir FirebaseChannel yang sudah Anda buat
         if ($notifiable->fcm_token) {
-            $channels[] = 'firebase';
+            $channels[] = \App\Notifications\Channels\FirebaseChannel::class;
         }
+
         return $channels;
     }
 
