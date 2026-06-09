@@ -1,0 +1,108 @@
+name: 🚀 Build & Deploy PTIK Web
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PHP_VERSION: "8.2"
+  NODE_VERSION: "20"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # Checkout
+      - uses: actions/checkout@v4
+
+      # Setup PHP
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, dom, fileinfo, mysql, curl, zip, gd, bcmath, intl
+          tools: composer:v2
+
+      # Install Composer
+      - run: |
+          composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+          composer dump-autoload --optimize --classmap-authoritative
+
+      # Compress vendor
+      - name: 📦 Compress Vendor
+        run: zip -r vendor.zip vendor
+
+      # Setup Node
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci --prefer-offline --no-audit
+      - run: npm run build
+
+      # Inject .env
+      - run: printf "%s" "${{ secrets.DOT_ENV }}" | tee .env
+
+      # Optimize Laravel
+      - run: |
+          php artisan config:cache
+          php artisan view:cache
+          php artisan event:cache
+
+      # Security Cleanup
+      - run: |
+          rm -rf tests .github .vscode
+          rm -f phpunit.xml .styleci.yml README.md CHANGELOG.md
+          rm -f package.json package-lock.json
+          rm -rf node_modules scripts
+
+      # Upload Core
+      - name: 🚀 Upload Core to Release Dir
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          exclude: |
+            **/vendor/**
+            /vendor/**
+            **/.git*
+            **/.git/**
+            storage/logs/**
+            storage/framework/cache/**
+            storage/framework/sessions/**
+            storage/framework/views/**
+            .env.example
+            .env.testing
+
+      # Deploy Public
+      - name: 🌐 Deploy Public Files
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: public/
+          server-dir: ${{ secrets.FTP_PUBLIC_DIR }}
+          exclude: |
+            index.php
+            .htaccess
+
+      # Summary
+      - name: 📊 Deployment Summary
+        run: |
+          echo "================================="
+          echo "🎉 PTIK DEPLOYMENT SUCCESS"
+          echo "Commit: ${{ github.sha }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Date: $(date)"
+          echo "================================="
