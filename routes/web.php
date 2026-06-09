@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Admin\GuruMapel\index as GuruMapel;
+use App\Livewire\Admin\GuruMapel\Index as GuruMapel;
 use App\Livewire\Admin\Kelas\Index as ManajemenKelas;
 use App\Livewire\Admin\ManajemenAbsensi\Detail;
 use App\Livewire\Admin\ManajemenAbsensi\Index as ManajemenAbsensiForAdmin;
