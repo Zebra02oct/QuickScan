@@ -202,19 +202,15 @@ class AttendanceController extends Controller
                 default => 0,
             };
         }
-
-        // 3. PERBAIKAN: Skor dihitung dari total poin dibagi total sesi kelas yang sudah berjalan
         $score = ($totalPoints / $totalSessions);
-
-        // Menentukan Tier berdasarkan hasil pembagian riil
         if ($score >= 90) {
-            $tier = 'Emas';
+            $tier = 'Imortal';
             $color = '#FFD700';
         } elseif ($score >= 75) {
-            $tier = 'Perak';
+            $tier = 'Diamond';
             $color = '#B4B4B4';
         } else {
-            $tier = 'Perunggu';
+            $tier = 'Bronze';
             $color = '#CD7F32';
         }
 
@@ -228,24 +224,17 @@ class AttendanceController extends Controller
     public function active(Request $request): JsonResponse
     {
         SesiAbsensi::tutupSesiOtomatis();
-
         if ($response = $this->ensureActiveStudent($request)) {
             return $response;
         }
-
         $user = $request->user()->loadMissing('siswa');
-
         $siswa = $user->siswa;
-
-        // Cari sesi aktif yang sesuai dengan kelas siswa
         $sesiQuery = SesiAbsensi::with(['guruMapel.mapel', 'guruMapel.kelas', 'guruMapel.guru.user'])
             ->where('status', 'berjalan')
             ->whereHas('guruMapel', function ($q) use ($siswa) {
                 $q->where('kelas_id', $siswa->kelas_id);
             });
-
         $sesi = $sesiQuery->latest()->first();
-
         if (!$sesi) {
             return response()->json([
                 'active_session' => null,

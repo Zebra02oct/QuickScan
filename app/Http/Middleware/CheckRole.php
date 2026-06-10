@@ -15,17 +15,15 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
-       
+
         if (!auth()->check()) {
             return redirect()->route('login');
         }
 
-       
+
         if (auth()->user()->role !== $role) {
             abort(403, 'Akses Ditolak! Anda tidak memiliki izin untuk masuk ke halaman ini.');
         }
-
-        // Kalau aman, silakan lewat!
         return $next($request);
     }
 }

@@ -13,7 +13,7 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 class SiswaImport implements ToCollection, WithHeadingRow, WithChunkReading
 {
     protected $kelas_id;
-    public $rowCount = 0; 
+    public $rowCount = 0;
 
     public function __construct($kelas_id)
     {
@@ -35,12 +35,10 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithChunkReading
             $email = trim($row['email'] ?? '');
             $jk    = trim($row['jenis_kelamin'] ?? '');
 
-         
+
             if ($nama === '' && $nisn === '' && $jk === '') {
                 continue;
             }
-
-            // Jika email kosong, auto-generate dari 3 digit terakhir NISN
             if ($email === '') {
                 $email = substr($nisn, -3) . '@smk.belajar.id';
             }
@@ -49,7 +47,7 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithChunkReading
                 throw new \Exception("Data Ditolak! Ada kolom yang belum diisi pada baris ke-{$barisExcel}. (Nama, NISN, dan Jenis Kelamin wajib diisi semua).");
             }
 
-       
+
             $cekEmail = User::where('email', $email)->exists();
             $cekNisn  = Siswa::where('nisn', $nisn)->exists();
 
@@ -65,14 +63,14 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithChunkReading
                 'email'    => $email,
                 'status'   => 'aktif',
                 'jenis_kelamin' => strtoupper($jk),
-                'password' => Hash::make($nisn), 
+                'password' => Hash::make($nisn),
             ]);
 
             Siswa::create([
                 'user_id'       => $user->id,
                 'kelas_id'      => $this->kelas_id,
                 'nisn'          => $nisn,
-                
+
             ]);
 
             $this->rowCount++;
