@@ -1,8 +1,8 @@
 <?php
 
 use App\Livewire\Auth\Login;
-use App\Livewire\Auth\ForgotPassword; // Tambahan import
-use App\Livewire\Auth\ResetPassword;  // Tambahan import
+use App\Livewire\Auth\ForgotPassword;
+use App\Livewire\Auth\ResetPassword;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -21,7 +21,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-  
+
     Route::post('logout', function (Request $request) {
         Auth::guard('web')->logout();
 

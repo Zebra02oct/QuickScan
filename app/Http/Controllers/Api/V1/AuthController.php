@@ -87,20 +87,15 @@ class AuthController extends Controller
     {
         $request->validate([
             'old_password' => ['required', 'string'],
-            // 'confirmed' otomatis akan mengecek apakah isinya sama dengan 'new_password_confirmation'
-            'new_password' => ['required', 'string', 'min:6', 'confirmed'], 
+            'new_password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
 
         $user = $request->user();
-
-        // Cek apakah password lama yang dimasukkan sesuai dengan di database
         if (!Hash::check($request->old_password, $user->password)) {
             return response()->json([
                 'message' => 'Password lama yang Anda masukkan salah.',
-            ], 400); // 400 Bad Request, ini akan ditangkap dengan pas oleh Flutter Anda
+            ], 400);
         }
-
-        // Simpan password baru
         $user->update([
             'password' => Hash::make($request->new_password)
         ]);

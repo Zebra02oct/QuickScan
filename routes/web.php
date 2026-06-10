@@ -32,7 +32,7 @@ Route::middleware(['auth'])->get('/dashboard', function () {
         'admin' => route('admin.dashboard'),
         'guru'  => route('guru.dashboard'),
         'siswa' => route('siswa.dashboard'),
-        default => '/', 
+        default => '/',
     };
 
     return redirect()->intended($urlTujuan);
@@ -47,35 +47,33 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/manajemen-kelas', ManajemenKelas::class)->name('admin.kelas.index');
     Route::get('/manajemen-mapel', ManajuemenMapel::class)->name('admin.mapel.index');
     Route::get('/manajemen-guru-mapel', GuruMapel::class)->name('admin.guruMapel.index');
-      Route::get('/manajemen-absensi', ManajemenAbsensiForAdmin::class)->name('admin.manajemenAbsensi.index');
-            Route::get('/manajemenAbsensi/{sesi_id}', Detail::class)->name('admin.manajemenAbsensi.detail');
+    Route::get('/manajemen-absensi', ManajemenAbsensiForAdmin::class)->name('admin.manajemenAbsensi.index');
+    Route::get('/manajemenAbsensi/{sesi_id}', Detail::class)->name('admin.manajemenAbsensi.detail');
 
-             Route::get('/laporanAbsensi', LaporanAbsensiAdmin::class)->name('admin.laporanAbsensi'); 
-             Route::get('/laporan-absensi/{kelas_id}', LaporanAbsensiDetailAdmin::class)->name('admin.laporanAbsensi.detail');
+    Route::get('/laporanAbsensi', LaporanAbsensiAdmin::class)->name('admin.laporanAbsensi');
+    Route::get('/laporan-absensi/{kelas_id}', LaporanAbsensiDetailAdmin::class)->name('admin.laporanAbsensi.detail');
 });
 
-Route::middleware(['auth' ,'role:guru'])->prefix('guru')->group(function () {
+Route::middleware(['auth', 'role:guru'])->prefix('guru')->group(function () {
     Route::get('/dashboard', GuruDashboard::class)->name('guru.dashboard');
-    Route::get('/buka-sesi',BukaSesiAbsen::class)->name('guru.absen.buka');
-Route::get('/live-absen/{token}', LiveMonitorAbsen::class)->name('guru.absen.live');
-  Route::get('/manajemen-absensi', ManajemenAbsensi::class)->name('guru.manajemenAbsensi');
-  Route::get('/manajemen/absensi/{sesi_id}', DetailAbsensi::class)->name('guru.detailAbsensi');
+    Route::get('/buka-sesi', BukaSesiAbsen::class)->name('guru.absen.buka');
+    Route::get('/live-absen/{token}', LiveMonitorAbsen::class)->name('guru.absen.live');
+    Route::get('/manajemen-absensi', ManajemenAbsensi::class)->name('guru.manajemenAbsensi');
+    Route::get('/manajemen/absensi/{sesi_id}', DetailAbsensi::class)->name('guru.detailAbsensi');
 
-    Route::get('/laporanAbsensi', LaporanAbsensiGuru::class)->name('guru.laporanAbsensi'); 
-      Route::get('/guru/laporanAbsensi/detail/{id}', LaporanAbsensiDetail::class)->name('guru.laporanAbsensi.detail');
+    Route::get('/laporanAbsensi', LaporanAbsensiGuru::class)->name('guru.laporanAbsensi');
+    Route::get('/guru/laporanAbsensi/detail/{id}', LaporanAbsensiDetail::class)->name('guru.laporanAbsensi.detail');
 });
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
-     Route::get('/dashboard', SiswaDashboard::class)->name('siswa.dashboard');
-     Route::get('/riwayat-kehadiran', RiwayatKehadiran::class)->name('siswa.riwayatKehadiran');
+    Route::get('/dashboard', SiswaDashboard::class)->name('siswa.dashboard');
+    Route::get('/riwayat-kehadiran', RiwayatKehadiran::class)->name('siswa.riwayatKehadiran');
     Route::get('/scan-absen', \App\Livewire\Siswa\ScanAbsen::class)->name('siswa.absen.scan');
-
 });
 
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/profile', ProfileIndex::class)->name('profile');
-
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

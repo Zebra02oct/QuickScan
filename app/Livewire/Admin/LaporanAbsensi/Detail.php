@@ -33,8 +33,6 @@ class Detail extends Component
     {
         $this->kelas_id = $kelas_id;
         $this->kelas = Kelas::findOrFail($kelas_id);
-
-        // Nilai default buat "Ban Serep" kalau URL-nya polos
         $now = Carbon::now();
         $defaultStart = $now->month >= 7 ? $now->year . '-07-01' : $now->year . '-01-01';
         $defaultEnd = $now->month >= 7 ? $now->year . '-12-31' : $now->year . '-06-30';

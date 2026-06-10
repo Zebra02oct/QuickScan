@@ -60,7 +60,7 @@ class Form extends Component
    #[Computed]
 public function listKelas()
 {
-    return Kelas::select('id', 'nama_kelas', 'is_active') // Ambil juga is_active buat flag di UI
+    return Kelas::select('id', 'nama_kelas', 'is_active') 
         ->where(function ($query) {
             $query->where('is_active', 1);
 
