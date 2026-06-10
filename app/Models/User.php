@@ -64,7 +64,7 @@ class User extends Authenticatable
     }
     public function siswa()
     {
-        return $this->hasOne(siswa::class);
+        return $this->hasOne(Siswa::class);
     }
 
     public function jadwals_guru()
