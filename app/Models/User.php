@@ -60,7 +60,7 @@ class User extends Authenticatable
 
     public function guru()
     {
-        return $this->hasOne(guru::class);
+        return $this->hasOne(Guru::class);
     }
     public function siswa()
     {
